@@ -358,33 +358,33 @@ const UI = {
                 <div class="QZjVU hWOQY">
                     <div class="result-wrapper"><div class="main-result"></div></div>
                 </div>
-            </div>
-            <style>
-/* Pengaturan Default (Tampilan Mobile / Layar Kecil) */
-.logo#main-lgx { 
-  display: flex; 
-  justify-content: center; /* Logo di tengah saat di HP */
-  align-items: center; 
-  background: #fff;        /* Background putih */
-  padding: 4px 12px; 
-  padding-top: 8px;
-  margin-bottom: 8px; 
-}
-
-.logo#main-lgx img { 
-  width: 100px; 
-  height: 45px; 
-  object-fit: contain; 
-}
-
-/* Pengaturan untuk Layar Desktop (min-width: 780px ke atas) */
-@media (min-width: 780px) {
-  .logo#main-lgx {
-    justify-content: flex-start !important; /* Otomatis pindah ke pojok kiri di desktop */
-  }
-}
-
-            </style>`;
+            </div><style> 
+  /* Pengaturan Default (Tampilan Mobile / Layar Kecil) */ 
+  .logo#main-lgx { 
+    display: flex; 
+    justify-content: center; /* Logo di tengah saat di HP */ 
+    align-items: center; 
+    background: transparent; /* Transparan agar tidak ada gap putih */ 
+    padding: 8px 12px; 
+    margin: 0; 
+    width: 100%;
+  } 
+  
+  .logo#main-lgx img { 
+    width: 100px; 
+    height: 45px; 
+    object-fit: contain; 
+  } 
+  
+  /* Pengaturan untuk Layar Desktop (min-width: 780px ke atas) */ 
+  @media (min-width: 780px) { 
+    .logo#main-lgx { 
+      justify-content: flex-start !important; /* Otomatis pindah ke pojok kiri di desktop */ 
+      padding-left: 16px;                     /* Beri jarak sedikit dari tepi kiri */
+    } 
+  } 
+</style>
+`;
             
         UI.setupEventListeners();
     },

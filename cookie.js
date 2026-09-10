@@ -2,7 +2,7 @@
 
 const DEFAULT_SETTINGS = {
   theme: "light",
-  lang: "id",
+  lang: "en",
   newtab: false,
   newurl: false,
   favicon: true,

@@ -238,56 +238,59 @@ const Widgets = {
         }
     },
 
-// Di dalam objek Widgets:
 checkVideoWidget: async () => {
-  const slot = document.getElementById("dynamic-video-widget-slot");
-  if (!slot) return;
+    const slot = document.getElementById("dynamic-video-widget-slot");
+    if (!slot) return;
+    try {
+        const data = await API.fetchVideo(Config.q, 4);
+        if (!data.items || !data.items.length) {
+            slot.remove();
+            return;
+        }
 
-  try {
-    const data = await API.fetchVideo(Config.q, 3);
-    if (!data.items || !data.items.length) {
-      slot.remove(); // Hapus slot jika ternyata tidak ada video
-      return;
+        let videonya = "";
+        let limit = Math.min(data.items.length, 4);
+        for (let i = 0; i < limit; i++) {
+            let item = data.items[i];
+            let videoId = item.id.videoId || item.id;
+            let title = Utils.escapeHTML(item.snippet.title);
+            let thumb = item.snippet.thumbnails.medium.url;
+            let channel = Utils.escapeHTML(item.snippet.channelTitle);
+            let dateStr = Utils.dateConversion(item.snippet.publishTime);
+
+            videonya += `
+                <div class="vidbung">
+                    <div class="tab-tb">
+                        <a href="https://youtube.com/watch?v=${videoId}">
+                            <div class="viditem">
+                                <div class="thumbnail">
+                                    <img src="${thumb}">
+                                    <div class="XTiWK">
+                                        <span class="NwGDz">
+                                            <svg focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                                                <circle fill="#fff" cx="12" cy="12" r="6.2"/>
+                                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5"></path>
+                                            </svg>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="sampingnye">
+                                    <div class="joedoel">${title}</div>
+                                    <div class="soember">YouTube<span class="dot"></span><div class="chnama">${channel}</div></div>
+                                    <div class="tanggal">${dateStr}</div>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>`;
+        }
+
+        slot.className = "VtuHV tab-result Dxcgd eb8xCva";
+        slot.innerHTML = `<div class="title Jhtm">${getText("vidTitle")}</div><div class="PbNgks">${videonya}</div>`;
+    } catch (err) {
+        slot.remove();
+        console.log("Gagal memuat widget video:", err);
     }
-
-    let videoItemsHTML = "";
-    data.items.slice(0, 3).forEach(item => {
-      const videoId = item.id.videoId || item.id;
-      const title = Utils.escapeHTML(item.snippet.title);
-      const thumb = item.snippet.thumbnails.medium.url;
-      const channel = Utils.escapeHTML(item.snippet.channelTitle);
-      const timeAgo = Utils.timeAgo(item.snippet.publishTime);
-
-      videoItemsHTML += `
-        <div class="video-widget-item" style="display: flex; gap: 12px; margin-bottom: 12px; align-items: center;">
-          <a href="https://youtube.com/watch?v=${videoId}" style="display: flex; gap: 12px; text-decoration: none; color: inherit; width: 100%;">
-            <div style="position: relative; flex-shrink: 0; width: 140px; height: 80px; border-radius: 8px; overflow: hidden; background: #000;">
-              <img src="${thumb}" style="width: 100%; height: 100%; object-fit: cover;">
-            </div>
-            <div style="display: flex; flex-direction: column; justify-content: center; overflow: hidden;">
-              <div style="font-size: 14px; font-weight: 500; line-height: 1.3; color: #1a0dab; margin-bottom: 4px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">${title}</div>
-              <div style="font-size: 12px; color: #5f6368;">YouTube · ${channel}</div>
-              <div style="font-size: 12px; color: #70757a; margin-top: 2px;">${timeAgo}</div>
-            </div>
-          </a>
-        </div>
-      `;
-    });
-
-    // Isi slot kosong dengan widget video yang sudah jadi
-    slot.className = "tab-result VtuHV eb8xCva";
-    slot.style.cssText = "background: #fff; border-radius: 12px; padding: 16px; margin-bottom: 16px; border: 1px solid #dfe1e5;";
-    slot.innerHTML = `
-      <div class="title" style="font-size: 20px; font-weight: 400; margin-bottom: 12px; color: #202124;">${getText("vidTitle")}</div>
-      <div class="PbNgks">${videoItemsHTML}</div>
-      <div style="border-top: 1px solid #dfe1e5; margin-top: 8px; padding-top: 12px; text-align: center;">
-        <a href="/search?q=${encodeURIComponent(Config.q)}&tbm=vid${searchLangParam}" style="color: #1a0dab; font-weight: 500; text-decoration: none; font-size: 14px;">Video lainnya ›</a>
-      </div>
-    `;
-  } catch (err) {
-    slot.remove();
-    console.log("Gagal memuat widget video:", err);
-  }
 },
 
 

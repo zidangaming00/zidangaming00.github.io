@@ -384,7 +384,7 @@ const UI = {
                         padding: 0;
                     }
                 }
-            </style>
+            </style>`;
             
         UI.setupEventListeners();
     },

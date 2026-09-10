@@ -31,6 +31,7 @@
 /* Varian "flat": tanpa border, shadow tipis di mobile — dulu class eb8xCva */
 .result-card--flat {
   border: none;
+   border-bottom: 1px solid var(--color-border, #e0e0e0);
   margin-bottom: 8px;
 }
 /*

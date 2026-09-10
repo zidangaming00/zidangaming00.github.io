@@ -33,9 +33,10 @@
   border: none;
   margin-bottom: 8px;
 }
+/*
 @media (max-width: 480px) {
   .result-card--flat { box-shadow: var(--card-shadow); }
-}
+}*/
 
 .result-card .title,
 .result-card .title-black {

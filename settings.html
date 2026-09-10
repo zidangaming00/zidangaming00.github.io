@@ -20,6 +20,27 @@
       --radius-btn: 12px;
     }
 
+    /* Mode Gelap (Dark Mode) */
+    html.dark {
+      --primary: #8ab4f8;        /* Biru terang lembut agar tidak sakit di mata */
+      --bg: #121212;             /* Latar belakang utama (Muted Dark) */
+      --surface: #1e1e1e;        /* Warna permukaan kartu / header */
+      --text-main: #e8eaed;      /* Teks putih terang */
+      --text-muted: #9aa0a6;     /* Teks sekunder abu-abu */
+      --border-color: rgba(255, 255, 255, 0.12); /* Garis tepi subtle */
+      --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.4);
+    }
+
+    /* Penyesuaian kecil untuk elemen form di dark mode */
+    html.dark select option {
+      background-color: var(--surface);
+      color: var(--text-main);
+    }
+
+    .back-btn:hover {
+      background: var(--border-color); /* Agar hover tombol back fleksibel di light/dark */
+    }
+
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
@@ -350,6 +371,12 @@
     // Load preferensi dari cookie.js
     document.addEventListener('DOMContentLoaded', () => {
       const config = getData(); // Mengambil data dari cookie.js
+
+      themeSelect.value = config.theme || 'light';
+      // [Tambahan] Terapkan tema gelap jika ada di pengaturan
+      if (config.theme === 'dark') {
+        document.body.classList.add('dark');
+      }
 
       themeSelect.value = config.theme || 'light';
       langSelect.value = config.lang || 'id';

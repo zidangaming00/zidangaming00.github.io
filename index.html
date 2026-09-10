@@ -328,6 +328,19 @@
     }
   </style>
 </head>
+<script>
+  (function() {
+    const cookies = document.cookie.split(';');
+    for (let c of cookies) {
+      if (c.trim().startsWith('settings=')) {
+        try {
+          const settings = JSON.parse(decodeURIComponent(c.trim().split('=')[1]));
+          if (settings.theme === 'dark') document.documentElement.classList.add('dark');
+        } catch(e) {}
+      }
+    }
+  })();
+</script>
 <body>
 
   <header>

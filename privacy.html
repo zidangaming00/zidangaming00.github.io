@@ -270,16 +270,28 @@
   </div>
 
   <script>
-    (function syncTheme() {
-      const savedTheme = localStorage.getItem('theme');
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-
-      if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
-        document.body.classList.add('dark');
-      } else {
-        document.body.classList.remove('dark');
+  (function syncTheme() {
+    // Membaca cookie secara manual agar tidak perlu memuat seluruh cookie.js 
+    // jika hanya butuh mengecek tema dengan cepat.
+    let isDark = false;
+    const cookies = document.cookie.split(';');
+    for (let cookie of cookies) {
+      const [key, val] = cookie.trim().split('=');
+      if (key === 'settings') {
+        try {
+          const parsed = JSON.parse(decodeURIComponent(val));
+          if (parsed.theme === 'dark') isDark = true;
+        } catch(e) {}
       }
-    })();
-  </script>
+    }
+    
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (isDark || (!document.cookie.includes('settings=') && prefersDark)) {
+      document.body.classList.add('dark');
+    } else {
+      document.body.classList.remove('dark');
+    }
+  })();
+</script>
 </body>
 </html>

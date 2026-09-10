@@ -24,12 +24,9 @@ const Config = {
 };
 
 // Mengambil pengaturan dari Cookies
-const getSettings = () => {
-    const cookieString = document.cookie.split('; ').find(row => row.startsWith('settings='));
-    return cookieString ? (JSON.parse(cookieString.split('=')[1]) || {}) : {};
-};
-const settings = getSettings();
-const isIdLang = settings.lang === "Indonesia" || Config.hl === "id";
+const settings = typeof getData === 'function' ? getData() : {};
+const isIdLang = settings.lang === "id" || Config.hl === "id"; // pastikan mencocokkan "id" jika di cookie.js defaultnya "en"
+
 const searchLangParam = isIdLang ? `&hl=${Config.hl}` : "";
 const localLang = isIdLang ? "id-ID" : "en-US";
 

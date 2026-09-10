@@ -20,6 +20,16 @@
       --border-radius: 28px;
     }
 
+    body.dark {
+      --bg-page: #121316;
+      --bg-card: #1e1f23;
+      --text-main: #e8eaed;
+      --text-muted: #9aa0a6;
+      --border-color: rgba(255, 255, 255, 0.08);
+      --accent-blue: #8ab4f8;
+      --accent-blue-bg: rgba(138, 180, 248, 0.12);
+    }
+
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: 'Inter', -apple-system, sans-serif;
@@ -328,19 +338,6 @@
     }
   </style>
 </head>
-<script>
-  (function() {
-    const cookies = document.cookie.split(';');
-    for (let c of cookies) {
-      if (c.trim().startsWith('settings=')) {
-        try {
-          const settings = JSON.parse(decodeURIComponent(c.trim().split('=')[1]));
-          if (settings.theme === 'dark') document.documentElement.classList.add('dark');
-        } catch(e) {}
-      }
-    }
-  })();
-</script>
 <body>
 
   <header>
@@ -567,6 +564,29 @@
     } else {
       voiceBtn.style.display = 'none';
     }
+
+   (function syncTheme() {
+    // Membaca cookie secara manual agar tidak perlu memuat seluruh cookie.js 
+    // jika hanya butuh mengecek tema dengan cepat.
+    let isDark = false;
+    const cookies = document.cookie.split(';');
+    for (let cookie of cookies) {
+      const [key, val] = cookie.trim().split('=');
+      if (key === 'settings') {
+        try {
+          const parsed = JSON.parse(decodeURIComponent(val));
+          if (parsed.theme === 'dark') isDark = true;
+        } catch(e) {}
+      }
+    }
+    
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (isDark || (!document.cookie.includes('settings=') && prefersDark)) {
+      document.body.classList.add('dark');
+    } else {
+      document.body.classList.remove('dark');
+    }
+  })();
   </script>
 
   <script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "dd550924a55b45f3bf982820e098c044"}'></script>

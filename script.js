@@ -360,30 +360,30 @@ const UI = {
                 </div>
             </div>
             <style>
-                .logo#main-lgx {
-                    display: flex;
-                    justify-content: flex-start;
-                    align-items: center;
-                    background: transparent;
-                    padding: 4px 12px;
-                    margin-bottom: 8px;
-                }
-                .logo#main-lgx img {
-                    width: 85px;
-                    height: auto;
-                    max-height: 35px;
-                    object-fit: contain;
-                }
-                /* Penyesuaian saat mode desktop/layar lebar */
-                @media (min-width: 780px) {
-                    .logo#main-lgx {
-                        position: absolute;
-                        top: 10px;
-                        left: 10px;
-                        margin-bottom: 0;
-                        padding: 0;
-                    }
-                }
+/* Pengaturan Default (Tampilan Mobile / Layar Kecil) */
+.logo#main-lgx { 
+  display: flex; 
+  justify-content: center; /* Logo di tengah saat di HP */
+  align-items: center; 
+  background: #fff;        /* Background putih */
+  padding: 4px 12px; 
+  padding-top: 8px;
+  margin-bottom: 8px; 
+}
+
+.logo#main-lgx img { 
+  width: 100px; 
+  height: 45px; 
+  object-fit: contain; 
+}
+
+/* Pengaturan untuk Layar Desktop (min-width: 780px ke atas) */
+@media (min-width: 780px) {
+  .logo#main-lgx {
+    justify-content: flex-start !important; /* Otomatis pindah ke pojok kiri di desktop */
+  }
+}
+
             </style>`;
             
         UI.setupEventListeners();

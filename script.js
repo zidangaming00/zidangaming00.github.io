@@ -373,16 +373,37 @@ const UI = {
         const clearBtn = document.querySelector(".cleartext");
         const toggleBtn = document.querySelector(".search-toggle");
 
-        searchInput.addEventListener('input', () => clearBtn.style.display = searchInput.value ? "block" : "none");
-        clearBtn.addEventListener('click', () => { searchInput.value = ""; searchInput.focus(); clearBtn.style.display = "none"; });
-        searchInput.addEventListener('keyup', (e) => { if (e.key === "Enter") toggleBtn.click(); });
-        
-        toggleBtn.addEventListener('click', () => {
-            if (searchInput.value.trim()) {
-                const searchData = Config.tbm ? `&tbm=${Config.tbm}` : "";
-                window.location.href = `/search?q=${encodeURIComponent(searchInput.value).replace(/%20/g,'+')}${searchData}${searchLangParam}${searchParam}`;
-            }
+        if (!searchInput) return;
+
+        // PERBAIKAN 1: Cek langsung saat halaman dimuat apakah input sudah ada isinya (dari URL)
+        if (searchInput.value.trim() && clearBtn) {
+            clearBtn.style.display = "block";
+        }
+
+        searchInput.addEventListener('input', () => {
+            if (clearBtn) clearBtn.style.display = searchInput.value ? "block" : "none";
         });
+
+        if (clearBtn) {
+            clearBtn.addEventListener('click', () => { 
+                searchInput.value = ""; 
+                searchInput.focus(); 
+                clearBtn.style.display = "none"; 
+            });
+        }
+
+        searchInput.addEventListener('keyup', (e) => { 
+            if (e.key === "Enter" && toggleBtn) toggleBtn.click(); 
+        });
+        
+        if (toggleBtn) {
+            toggleBtn.addEventListener('click', () => {
+                if (searchInput.value.trim()) {
+                    const searchData = Config.tbm ? `&tbm=${Config.tbm}` : "";
+                    window.location.href = `/search?q=${encodeURIComponent(searchInput.value).replace(/%20/g,'+')}${searchData}${searchLangParam}${searchParam}`;
+                }
+            });
+        }
         
         document.addEventListener('click', e => { if (e.target.matches('.show-wrapper .more')) handlePagination(); });
     },
@@ -531,7 +552,7 @@ function renderWebResults(res) {
                     <div class="tab-link">
                         <a href="${item.link}">
                             <div class="top">
-                                <div class="favicon"><img src="https://t0.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&url=${item.link}&size=64"></div>
+                                <div class="favicon"><img src="https://t0.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&url=${item.link}"></div>
                                 <div class="link-rw"><div class="link">${siteName}</div><div class="link k">${item.displayLink}</div></div>
                             </div>
                             <div class="title">${Utils.escapeHTML(item.title)}</div>

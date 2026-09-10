@@ -315,79 +315,66 @@ const Widgets = {
 // 6. UI BUILDER & LOGIC
 // ==========================================
 const UI = {
-    renderBase: () => {
-        document.title = isIdLang ? `${Config.q} - Penelusuran` : `${Config.q} - Search`;
-        if (settings.theme === "dark" || Config.th == 1) document.body.classList.add("dark");
+  renderBase: () => {
+    document.title = isIdLang ? `${Config.q} - Penelusuran` : `${Config.q} - Search`;
+    if (settings.theme === "dark" || Config.th == 1) document.body.classList.add("dark");
+    const svgIcons = { all: `<svg width="16" height="16" viewBox="0 0 16 16" fill="#6e7780"><path fill-rule="evenodd" clip-rule="evenodd" d="M6 1C2.686 1 0 3.686 0 7C0 10.314 2.686 13 6 13C7.647 13 9.138 12.337 10.223 11.263L14.787 14.84C15.113 15.096 15.585 15.039 15.84 14.713C16.096 14.387 16.039 13.915 15.713 13.66L11.149 10.083C11.689 9.182 12 8.127 12 7C12 3.686 9.314 1 6 1ZM1.5 7C1.5 4.515 3.515 2.5 6 2.5C8.485 2.5 10.5 4.515 10.5 7C10.5 9.485 8.485 11.5 6 11.5C3.515 11.5 1.5 9.485 1.5 7Z"></path></svg>`, images: `<svg width="16" height="16" viewBox="0 0 16 16" fill="#6e7780"><path fill-rule="evenodd" clip-rule="evenodd" d="M3.25 1C1.455 1 0 2.455 0 4.25V11.75C0 13.545 1.455 15 3.25 15H12.75C14.545 15 16 13.545 16 11.75V10.259C16 10.253 16 10.247 16 10.241V4.25C16 2.455 14.545 1 12.75 1H3.25ZM14.5 8.439V4.25C14.5 3.284 13.716 2.5 12.75 2.5H3.25C2.284 2.5 1.5 3.284 1.5 4.25V11.75C1.5 11.956 1.536 12.154 1.601 12.338L5.97 7.97C6.263 7.677 6.737 7.677 7.03 7.97L8 8.939L10.97 5.97C11.263 5.677 11.737 5.677 12.03 5.97L14.5 8.439ZM9.061 10L10.03 10.97C10.323 11.263 10.323 11.737 10.03 12.03C9.737 12.323 9.263 12.323 8.97 12.03L6.5 9.561L2.662 13.399C2.846 13.464 3.044 13.5 3.25 13.5H12.75C13.716 13.5 14.5 12.716 14.5 11.75V10.561L11.5 7.561L9.061 10Z"></path></svg>`, videos: `<svg width="16" height="16" viewBox="0 0 16 16" fill="#6e7780"><path fill-rule="evenodd" clip-rule="evenodd" d="M13.489 5.55C15.38 6.636 15.38 9.364 13.489 10.45L6.231 14.616C4.348 15.698 2 14.338 2 12.166L2 3.834C2 1.662 4.348 0.303 6.231 1.384L13.489 5.55ZM12.742 9.149C13.629 8.64 13.629 7.36 12.742 6.851L5.485 2.685C4.601 2.178 3.5 2.816 3.5 3.834L3.5 12.166C3.5 13.185 4.601 13.823 5.485 13.316L12.742 9.149Z"></path></svg>`, news: `<svg width="16" height="16" viewBox="0 0 22 22" fill="#6e7780"><path d="M12 11h6v2h-6v-2zm-6 6h12v-2H6v2zm0-4h4V7H6v6zm16-7.22v12.44c0 1.54-1.34 2.78-3 2.78H5c-1.64 0-3-1.25-3-2.78V5.78C2 4.26 3.36 3 5 3h14c1.64 0 3 1.25 3 2.78zM19.99 12V5.78c0-.42-.46-.78-1-.78H5c-.54 0-1 .36-1 .78v12.44c0 .42.46.78 1 .78h14c.54 0 1-.36 1-.78V12zM12 9h6V7h-6v2"></path></svg>`, maps: `<svg width="16" height="16" viewBox="0 0 16 16" fill="#6e7780"><path d="M8 8C9.105 8 10 7.105 10 6C10 4.895 9.105 4 8 4C6.895 4 6 4.895 6 6C6 7.105 6.895 8 8 8Z"></path></svg>` }; 
+    const createTab = (id, tbmVal, icon, label) => `<div class="search-item"><a href="/search?q=${encodeURIComponent(Config.q).replace(/%20/g,'+')}${tbmVal}${searchLangParam}${searchParam}" class="tab-wrapper" tab-id="${id}"><div class="label">${Config.windowWidth >= 780 ? svgIcons[icon] : ''}<span>${getText("tab", label)}</span></div></a></div>`; 
+    
+    document.body.innerHTML = ` 
+      <div class="root" id="main-bx"> 
+        <div class="kwuND KwbMG"><div class="cbKRN"></div></div> 
+        <div class="xzBdP"></div> 
+        <div class="hVhvp BbmqH"> 
+          <div class="KArDf"> 
+            <div class="xnan"><div class="logo" id="main-lgx"><a title="Kembali" href="/"><img id="logimg_Ux92" alt="Logo" src="/images/logo.png"></a></div></div> 
+            <div class="header"> 
+              <div class="search-box"> 
+                <div class="search-field"> 
+                  <input type="search" id="sear_21829_input" value="${Utils.escapeHTML(Config.q.trim())}" name="q" class="search-input" autocomplete="off" placeholder="${getText("placeholder")}"> 
+                  <div role="button" class="search-toggle inpbtun" id="xclarGh" title="Cari"></div> 
+                  <div role="button" class="cleartext inpbtun" style="display:none" id="Chasprn" title="Hapus"></div> 
+                </div> 
+              </div> 
+              <div class="search-menu"> 
+                ${createTab("all", "", "all", 0)} 
+                ${createTab("images", "&tbm=isch", "images", 1)} 
+                ${createTab("videos", "&tbm=vid", "videos", 2)} 
+                ${createTab("news", "&tbm=nws", "news", 3)} 
+                ${createTab("maps", "", "maps", 4)} 
+              </div> 
+            </div> 
+          </div> 
+        </div> 
+        <div class="QZjVU hWOQY"> 
+          <div class="result-wrapper"><div class="main-result"></div></div> 
+        </div> 
+      </div> 
+      <style> 
+        .logo#main-lgx { 
+          display: flex; 
+          justify-content: center; 
+          align-items: center; 
+          background: transparent; 
+          padding: 8px 12px; 
+          margin: 0; 
+          width: 100%; 
+        } 
+        .logo#main-lgx img { 
+          width: 100px; 
+          height: 45px; 
+          object-fit: contain; 
+        } 
+        @media (min-width: 780px) { 
+          .logo#main-lgx { 
+            justify-content: flex-start !important; 
+            padding-left: 16px; 
+          } 
+        } 
+      </style> `; 
+    UI.setupEventListeners(); 
+  },
 
-        const svgIcons = {
-            all: `<svg width="16" height="16" viewBox="0 0 16 16" fill="#6e7780"><path fill-rule="evenodd" clip-rule="evenodd" d="M6 1C2.686 1 0 3.686 0 7C0 10.314 2.686 13 6 13C7.647 13 9.138 12.337 10.223 11.263L14.787 14.84C15.113 15.096 15.585 15.039 15.84 14.713C16.096 14.387 16.039 13.915 15.713 13.66L11.149 10.083C11.689 9.182 12 8.127 12 7C12 3.686 9.314 1 6 1ZM1.5 7C1.5 4.515 3.515 2.5 6 2.5C8.485 2.5 10.5 4.515 10.5 7C10.5 9.485 8.485 11.5 6 11.5C3.515 11.5 1.5 9.485 1.5 7Z"></path></svg>`,
-            images: `<svg width="16" height="16" viewBox="0 0 16 16" fill="#6e7780"><path fill-rule="evenodd" clip-rule="evenodd" d="M3.25 1C1.455 1 0 2.455 0 4.25V11.75C0 13.545 1.455 15 3.25 15H12.75C14.545 15 16 13.545 16 11.75V10.259C16 10.253 16 10.247 16 10.241V4.25C16 2.455 14.545 1 12.75 1H3.25ZM14.5 8.439V4.25C14.5 3.284 13.716 2.5 12.75 2.5H3.25C2.284 2.5 1.5 3.284 1.5 4.25V11.75C1.5 11.956 1.536 12.154 1.601 12.338L5.97 7.97C6.263 7.677 6.737 7.677 7.03 7.97L8 8.939L10.97 5.97C11.263 5.677 11.737 5.677 12.03 5.97L14.5 8.439ZM9.061 10L10.03 10.97C10.323 11.263 10.323 11.737 10.03 12.03C9.737 12.323 9.263 12.323 8.97 12.03L6.5 9.561L2.662 13.399C2.846 13.464 3.044 13.5 3.25 13.5H12.75C13.716 13.5 14.5 12.716 14.5 11.75V10.561L11.5 7.561L9.061 10Z"></path></svg>`,
-            videos: `<svg width="16" height="16" viewBox="0 0 16 16" fill="#6e7780"><path fill-rule="evenodd" clip-rule="evenodd" d="M13.489 5.55C15.38 6.636 15.38 9.364 13.489 10.45L6.231 14.616C4.348 15.698 2 14.338 2 12.166L2 3.834C2 1.662 4.348 0.303 6.231 1.384L13.489 5.55ZM12.742 9.149C13.629 8.64 13.629 7.36 12.742 6.851L5.485 2.685C4.601 2.178 3.5 2.816 3.5 3.834L3.5 12.166C3.5 13.185 4.601 13.823 5.485 13.316L12.742 9.149Z"></path></svg>`,
-            news: `<svg width="16" height="16" viewBox="0 0 22 22" fill="#6e7780"><path d="M12 11h6v2h-6v-2zm-6 6h12v-2H6v2zm0-4h4V7H6v6zm16-7.22v12.44c0 1.54-1.34 2.78-3 2.78H5c-1.64 0-3-1.25-3-2.78V5.78C2 4.26 3.36 3 5 3h14c1.64 0 3 1.25 3 2.78zM19.99 12V5.78c0-.42-.46-.78-1-.78H5c-.54 0-1 .36-1 .78v12.44c0 .42.46.78 1 .78h14c.54 0 1-.36 1-.78V12zM12 9h6V7h-6v2"></path></svg>`,
-            maps: `<svg width="16" height="16" viewBox="0 0 16 16" fill="#6e7780"><path d="M8 8C9.105 8 10 7.105 10 6C10 4.895 9.105 4 8 4C6.895 4 6 4.895 6 6C6 7.105 6.895 8 8 8Z"></path></svg>`
-        };
-
-        const createTab = (id, tbmVal, icon, label) => 
-            `<div class="search-item"><a href="/search?q=${encodeURIComponent(Config.q).replace(/%20/g,'+')}${tbmVal}${searchLangParam}${searchParam}" class="tab-wrapper" tab-id="${id}"><div class="label">${Config.windowWidth >= 780 ? svgIcons[icon] : ''}<span>${getText("tab", label)}</span></div></a></div>`;
-
-        document.body.innerHTML = `
-            <div class="root" id="main-bx">
-                <div class="kwuND KwbMG"><div class="cbKRN"></div></div>
-                <div class="xzBdP"></div>
-                <div class="hVhvp BbmqH">
-                    <div class="KArDf">
-                        <div class="xnan"><div class="logo" id="main-lgx"><a title="Kembali" href="/"><img id="logimg_Ux92" alt="Logo" src="/images/logo.png"></a></div></div>
-                        <div class="header">
-                            <div class="search-box">
-                                <div class="search-field">
-                                    <input type="search" id="sear_21829_input" value="${Utils.escapeHTML(Config.q.trim())}" name="q" class="search-input" autocomplete="off" placeholder="${getText("placeholder")}">
-                                    <div role="button" class="search-toggle inpbtun" id="xclarGh" title="Cari"></div>
-                                    <div role="button" class="cleartext inpbtun" style="display:none" id="Chasprn" title="Hapus"></div>
-                                </div>
-                            </div>
-                            <div class="search-menu">
-                                ${createTab("all", "", "all", 0)}
-                                ${createTab("images", "&tbm=isch", "images", 1)}
-                                ${createTab("videos", "&tbm=vid", "videos", 2)}
-                                ${createTab("news", "&tbm=nws", "news", 3)}
-                                ${createTab("maps", "", "maps", 4)}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="QZjVU hWOQY">
-                    <div class="result-wrapper"><div class="main-result"></div></div>
-                </div>
-            </div><style> 
-  /* Pengaturan Default (Tampilan Mobile / Layar Kecil) */ 
-  .logo#main-lgx { 
-    display: flex; 
-    justify-content: center; /* Logo di tengah saat di HP */ 
-    align-items: center; 
-    background: transparent; /* Transparan agar tidak ada gap putih */ 
-    padding: 8px 12px; 
-    margin: 0; 
-    width: 100%;
-  } 
-  
-  .logo#main-lgx img { 
-    width: 100px; 
-    height: 45px; 
-    object-fit: contain; 
-  } 
-  
-  /* Pengaturan untuk Layar Desktop (min-width: 780px ke atas) */ 
-  @media (min-width: 780px) { 
-    .logo#main-lgx { 
-      justify-content: flex-start !important; /* Otomatis pindah ke pojok kiri di desktop */ 
-      padding-left: 16px;                     /* Beri jarak sedikit dari tepi kiri */
-    } 
-  } 
-</style>
-`;
-            
-        UI.setupEventListeners();
-    },
 
     setupEventListeners: () => {
         const searchInput = document.querySelector(".search-input");

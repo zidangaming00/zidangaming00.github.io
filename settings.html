@@ -1,506 +1,400 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Search - Settings</title>
-</head>
+  <meta charset="utf-8">
+  <title>Pengaturan — Deevv Search</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="images/search.png" type="image/png">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --primary: #1a73e8;
+      --bg: #f8f9fa;
+      --surface: #ffffff;
+      --text-main: #1f1f1f;
+      --text-muted: #70757a;
+      --border-color: rgba(0, 0, 0, 0.08);
+      --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.04);
+      --radius-card: 18px;
+      --radius-btn: 12px;
+    }
 
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background-color: var(--bg);
+      color: var(--text-main);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px 16px;
+    }
+
+    header {
+      width: 100%;
+      max-width: 520px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 24px;
+      padding: 8px 0;
+    }
+
+    .back-btn {
+      background: var(--surface);
+      border: 1px solid var(--border-color);
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-main);
+      text-decoration: none;
+      box-shadow: var(--shadow-soft);
+      transition: transform 0.2s, background 0.2s;
+    }
+
+    .back-btn:hover {
+      transform: translateX(-2px);
+      background: #f1f3f4;
+    }
+
+    .page-title {
+      font-size: 20px;
+      font-weight: 600;
+      letter-spacing: -0.3px;
+    }
+
+    main {
+      width: 100%;
+      max-width: 520px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .settings-group {
+      background: var(--surface);
+      border-radius: var(--radius-card);
+      box-shadow: var(--shadow-soft);
+      border: 1px solid var(--border-color);
+      overflow: hidden;
+    }
+
+    .group-header {
+      padding: 16px 20px 8px;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--primary);
+    }
+
+    .setting-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+      gap: 16px;
+    }
+
+    .setting-item:last-child {
+      border-bottom: none;
+    }
+
+    .setting-info {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .setting-label {
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--text-main);
+    }
+
+    .setting-desc {
+      font-size: 12.5px;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    select {
+      background: var(--bg);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 8px 12px;
+      border-radius: var(--radius-btn);
+      font-size: 13.5px;
+      font-weight: 500;
+      outline: none;
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    /* Switch Custom */
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 46px;
+      height: 26px;
+      flex-shrink: 0;
+    }
+
+    .switch input { opacity: 0; width: 0; height: 0; }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: #e0e0e0;
+      transition: .25s ease;
+      border-radius: 34px;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 20px;
+      width: 20px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: .25s ease;
+      border-radius: 50%;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    input:checked + .slider { background-color: var(--primary); }
+    input:checked + .slider:before { transform: translateX(20px); }
+
+    .btn-action {
+      background: transparent;
+      border: 1px solid var(--border-color);
+      color: #d93025;
+      padding: 8px 14px;
+      border-radius: var(--radius-btn);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .btn-action:hover { background: rgba(217, 48, 37, 0.06); }
+
+    /* Toast notification */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      background: #323232;
+      color: #fff;
+      padding: 12px 20px;
+      border-radius: 24px;
+      font-size: 13px;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.3s, transform 0.3s;
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    .toast.show { opacity: 1; transform: translateY(0); }
+
+    footer {
+      margin-top: auto;
+      padding: 24px 0 12px;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+  </style>
+</head>
 <body>
 
-<div class="root-PTvYB">
-  <div class="layout">
-    <div class="header">
+  <header>
+    <a href="index.html" class="back-btn" title="Kembali ke Beranda">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+    </a>
+    <h1 class="page-title">Pengaturan</h1>
+  </header>
 
-    <div class="title">All settings</div>
+  <main>
+    <!-- Group: Tampilan -->
+    <div class="settings-group">
+      <div class="group-header">Tampilan</div>
+      
+      <div class="setting-item">
+        <div class="setting-info">
+          <span class="setting-label">Tema Tampilan</span>
+          <span class="setting-desc">Pilih warna antarmuka Deevv Search</span>
+        </div>
+        <select id="theme_select">
+          <option value="light">Terang</option>
+          <option value="dark">Gelap (Segera)</option>
+          <option value="system">Sistem</option>
+        </select>
+      </div>
 
-  </div>
-    
-<div class="settings">
- 
-
-<div class="content">
-
-  <div class="column">
-    <div class="info">
-      <div class="label">Open Link in New Tab</div>
-      <div class="snippet">Opens search results in a new tab.</div>
+      <div class="setting-item">
+        <div class="setting-info">
+          <span class="setting-label">Favicon Situs</span>
+          <span class="setting-desc">Tampilkan logo situs web pada hasil pencarian</span>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="favicon_toggle">
+          <span class="slider"></span>
+        </label>
+      </div>
     </div>
-    <input class="toggle" type="checkbox" id="option1">
-  </div>
 
-  <div class="column">
-    <div class="info">
-      <div class="label">Language</div>
-      <div class="snippet">Change site language.</div>
-      <div class="snippet"><b>The language may not be completely accurate.</b></div>
-    </div>
-    <select name="language" class="select-option">
-      <option value="English" code="en">English</option>
-      <option value="Indonesia" code="id">Indonesia</option>
-    </select>
-  </div>
+    <!-- Group: Bahasa -->
+    <div class="settings-group">
+      <div class="group-header">Bahasa</div>
 
-  <div class="column">
-    <div class="info">
-      <div class="label">Site icon</div>
-      <div class="snippet">Displays a favicon on the left side of the results.</div>
+      <div class="setting-item">
+        <div class="setting-info">
+          <span class="setting-label">Bahasa Antarmuka</span>
+          <span class="setting-desc">Bahasa yang digunakan dalam layanan</span>
+        </div>
+        <select id="lang_select">
+          <option value="id">Bahasa Indonesia</option>
+          <option value="en">English (US)</option>
+        </select>
+      </div>
     </div>
-    <input class="toggle" type="checkbox" id="option4">
-  </div>
 
-  <div class="column">
-    <div class="info">
-      <div class="label">HTTP request method</div>
-      <div class="snippet">Set your search method with POST or GET.</div>
-    </div>
-    <select name="method" class="select-option notranslate">
-      <option value="GET" selected>GET</option>
-      <option value="POST" disabled>POST</option>
-    </select>
-  </div>
-  
-  <div class="column">
-    <div class="info">
-      <div class="label">Theme</div>
-      <div class="snippet">Set the appearance of the site interface to dark or light.</div>
-    </div>
-    <select name="theme" class="select-option">
-      <option value="light" code="light">Light</option>
-      <option value="dark" code="dark">Dark</option>
-    </select>
-  </div>
-  
-  <div class="buttons">
-    <button class="save">Save Settings</button>
-    <button class="reset">Reset Settings</button> 
-  </div>
-</div>
-</div>
-</div>
-  </div>
+    <!-- Group: Pencarian -->
+    <div class="settings-group">
+      <div class="group-header">Pencarian</div>
+      
+      <div class="setting-item">
+        <div class="setting-info">
+          <span class="setting-label">Buka di Tab Baru</span>
+          <span class="setting-desc">Membuka tautan hasil pencarian di tab terpisah</span>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="newtab_toggle">
+          <span class="slider"></span>
+        </label>
+      </div>
 
+      <div class="setting-item">
+        <div class="setting-info">
+          <span class="setting-label">Navigasi Langsung URL</span>
+          <span class="setting-desc">Buka situs langsung jika input berupa URL valid</span>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="newurl_toggle">
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="setting-item">
+        <div class="setting-info">
+          <span class="setting-label">Saran Pencarian</span>
+          <span class="setting-desc">Tampilkan rekomendasi kata kunci saat mengetik</span>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="suggest_toggle">
+          <span class="slider"></span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Group: Privasi & Cookie -->
+    <div class="settings-group">
+      <div class="group-header">Privasi & Cookie</div>
+
+      <div class="setting-item">
+        <div class="setting-info">
+          <span class="setting-label">Reset Cookie Pengaturan</span>
+          <span class="setting-desc">Kembalikan seluruh konfigurasimu ke bawaan</span>
+        </div>
+        <button class="btn-action" id="reset_cookie_btn">Reset Cookie</button>
+      </div>
+    </div>
+  </main>
+
+  <div id="toast" class="toast">Pengaturan tersimpan</div>
+
+  <footer>
+    &copy; Deevv Search &bull; Versi 1.3.0
+  </footer>
+
+  <!-- File External Cookie JS -->
+  <script src="cookie.js"></script>
+
+  <script>
+    // Elements DOM
+    const themeSelect = document.getElementById('theme_select');
+    const faviconToggle = document.getElementById('favicon_toggle');
+    const langSelect = document.getElementById('lang_select');
+    const newtabToggle = document.getElementById('newtab_toggle');
+    const newurlToggle = document.getElementById('newurl_toggle');
+    const suggestToggle = document.getElementById('suggest_toggle');
+    const resetCookieBtn = document.getElementById('reset_cookie_btn');
+    const toast = document.getElementById('toast');
+
+    function showToast(msg) {
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2000);
+    }
+
+    // Load preferensi dari cookie.js
+    document.addEventListener('DOMContentLoaded', () => {
+      const config = getData(); // Mengambil data dari cookie.js
+
+      themeSelect.value = config.theme || 'light';
+      langSelect.value = config.lang || 'id';
+      faviconToggle.checked = config.favicon;
+      newtabToggle.checked = config.newtab;
+      newurlToggle.checked = config.newurl;
+      suggestToggle.checked = config.suggest;
+    });
+
+    // Event Listener Update Opsi
+    themeSelect.addEventListener('change', (e) => {
+      updateSetting('theme', e.target.value);
+      showToast('Tema diperbarui');
+    });
+
+    langSelect.addEventListener('change', (e) => {
+      updateSetting('lang', e.target.value);
+      showToast('Bahasa diperbarui');
+    });
+
+    faviconToggle.addEventListener('change', (e) => {
+      updateSetting('favicon', e.target.checked);
+      showToast('Pengaturan Favicon disimpan');
+    });
+
+    newtabToggle.addEventListener('change', (e) => {
+      updateSetting('newtab', e.target.checked);
+      showToast('Pengaturan tab disimpan');
+    });
+
+    newurlToggle.addEventListener('change', (e) => {
+      updateSetting('newurl', e.target.checked);
+      showToast('Pengaturan URL disimpan');
+    });
+
+    suggestToggle.addEventListener('change', (e) => {
+      updateSetting('suggest', e.target.checked);
+      showToast('Pengaturan saran disimpan');
+    });
+
+    resetCookieBtn.addEventListener('click', () => {
+      clearData(); // Menghapus cookie dari cookie.js
+      showToast('Cookie berhasil di-reset');
+      setTimeout(() => location.reload(), 1200);
+    });
+  </script>
 </body>
 </html>
-
-<style>
-
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: Roboto, Arial, sans-serif;
-}
-  
-html, body {
-  width: 100%;
-}
-
-.header {
-  background: #fff;
-  padding: 15px;
-  display: grid;
-  place-items: center;
-  box-shadow: 0 2px 2px 0 rgba(0,0,0,.1);
-  position: -webkit-sticky;
-  position: sticky;
-  top: 0;
-  z-index: 100;
-}
-
-.header .title {
-  font-size: 22px;
-}
-  
-.settings {
-  padding: 10px;
-}
-
-body {
-  background: #F2F3F5;
-}
-  
-.layout {
-  background: transparent;  
-}
-
-.content {
-  border-top: 1px solid #EDEDED;
-  background: #fff;
-}
-
-.column {
-  width: 100%;
-  display: flex;
-  padding: 20px;
-  position: relative;
-  border-bottom: 1px solid #EDEDED;
-}
-
-.buttons {
-  width: 100%;
-  display: flex;
-  padding: 20px;
-  align-items: center;
-  flex-direction: column;
-}
-
-.column:last-child {
-  border: none;
-}
-
-.column .info {
-  display: flex;
-  flex-direction: column;
-  max-width: 75%;
-}
-
-.info .label {
-  font-size: 17px;
-  margin: 3px 0;
-}
-
-.info .snippet {
-  color: #494949;
-  font-size: 15px;
-}
-
-.buttons button {
-  width: 90%;
-  padding: 10px;
-  color: #fff;
-  border: none;
-  cursor: pointer;
-  margin: 4px 0;
-  font-size: 16px;
-  border-radius: 8px;
-  background: #4286F5;
-}
-  
-button.reset {
-  background: #838383;
-}
-
-.select-option {
-  height: 30px;
-  border-radius: 5px;
-  position: absolute;
-  right: 20px;
-  outline: none;
-  font-size: 15px;
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-  background: transparent;
-  border: 1px solid #ccc;
-}
-
-.toggle {
-  position: absolute;
-  right: 20px;
-  appearance: none;
-  width: 60px;
-  height: 30px;
-  border-radius: 5px;
-  cursor: pointer;
-  padding: 15px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: 0.1s;
-  border: 1px solid #ccc;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.toggle:before {
-  content: "Off";
-  font-size: 15px;
-}
-
-.toggle:checked:before {
-  content: "On";
-  color: white;
-}
-
-html[lang="id"] .toggle:before {
-  content: "Mati";
-}
-
-html[lang="id"] .toggle:checked:before {
-  content: "Aktif";
-}
-
-.toggle:checked {
-  border: none;
-  background: #4286F5;
-}
-
-@media (min-width: 780px) {
-  body {
-    background: #fff;
-  }
-  .settings {
-    width: 620px;
-    padding: 20px 120px 0;
-    box-sizing: initial;
-  }
-  .content {
-    border: none;
-  }
-  .buttons {
-    align-items: auto;
-    flex-direction: row;
-    justify-content: end;
-  }
-  .buttons button {
-    width: 30%;
-    margin: 0 5px;
-  }
-}
-  
-.ctm-alert {
-  width: 100%;
-  height: 100vh;
-  position: fixed;
-  left: 0; top: 0;
-  display: flex;
-  justify-content: center;
-  padding-top: 34vh;
-  user-select: none;
-  z-index: 999;
-  font-family: Arial, roboto;
-  background-color: rgba(0, 0, 0, 0.5);
-}
-
-.ctm-alert .box {
-  width: 320px;
-  max-width: 400px;
-  min-height: 150px;
-  max-height: 150px;
-  border-radius: 8px;
-  padding: 16px 18px;
-  position: relative;
-  background: white;
-}
-
-.ctm-alert .box .title {
-  color: black;
-  font-size: 19px;
-  font-weight: 450;
-  margin-top: 2px;
-  margin-bottom: 7px;
-}
-
-.ctm-alert .box .snippet {
-  color: #494949;
-  font-size: 16px;
-  margin-bottom: 5px;
-}
-
-.ctm-alert .box .button-wrap {
-  width: 100%;
-  position: absolute;
-  display: flex;
-  padding: 8px;
-  justify-content: right;
-  right: 0; bottom: 0;
-}
-
-.ctm-alert .box button {
-  min-width: 50px;
-  color: #1558d6;
-  padding: 8px;
-  outline: none;
-  border: none;
-  cursor: pointer;
-  margin-left: 8px;
-  font-size: 14px;
-  font-weight: 405;
-  border-radius: 3px;
-  background: transparent;
-  transition: all 0.2s;
-}
-
-.ctm-alert .box button:hover {
-  background-color: rgba(21, 89, 214, 0.2);
-}
-
-@media (min-width: 780px) {
-  .ctm-alert .box {
-    width: 400px;
-  }
-}
-
-</style>
-
-
-<script>
-  
-toggle = document.querySelectorAll(".toggle");
-const settingsCookie = document.cookie.indexOf("settings=");
-
-const settings = {
-  lang: "English",
-  newtab: false,
-  newurl: false,
-  favicon: true,
-  theme: "light"
-};
-
-function saveData() {
-  const settingsJson = JSON.stringify(settings);
-  const expirationDate = new Date();
-  expirationDate.setMonth(expirationDate.getMonth() + 18);
-  document.cookie = `settings=${settingsJson};expires=${expirationDate}`;
-}
-
-function updateData() {
-  if (settingsCookie > -1) {
-    document.cookie = `settings=${JSON.stringify(settings)}`;
-  }
-}
-
-function getData() {
-  const cookies = document.cookie.split(';');
-  for (const cookie of cookies) {
-    const parts = cookie.split('=');
-    if (parts[0] === 'settings') {
-      return JSON.parse(parts[1]);
-    }
-  }
-  return null;
-}
-
-if (settingsCookie > -1) {
-  settings.lang = getData().lang;
-  settings.newtab = getData().newtab;
-  settings.newurl = getData().newurl;
-  settings.favicon = getData().favicon;
-  settings.theme = getData().theme;
-} else {
-  saveData();
-}
-
-toggle.forEach(option => {
-  option.addEventListener('click', ()=> {
-    if (option.id == "option1" && !option.checked) {
-      settings.newtab = false;
-    } else if (option.id == "option1" && option.checked) {
-      settings.newtab = true;
-    } else if (option.id == "option2" && !option.checked) {
-      settings.newurl = false;
-    } else if (option.id == "option2" && option.checked) {
-      settings.newurl = true;
-    } else if (option.id == "option4" && !option.checked) {
-      settings.favicon = false;
-    } else if (option.id == "option4" && option.checked) {
-      settings.favicon = true;
-    }
-  });
-  window.addEventListener('load', ()=> {
-    if (option.id == "option1" && getData().newtab == true) {
-      option.checked = true;
-    }
-    if (option.id == "option2" && getData().newurl == true) {
-      option.checked = true;
-    }
-    if (option.id == "option4" && getData().favicon == true) {
-      option.checked = true;
-    }
-  });
-});
-
-selectOption = document.querySelectorAll("select");
-
-selectOption[0].addEventListener('change', ()=> {
-  settings.lang = selectOption[0].value;
-});
-
-selectOption[2].addEventListener('change', ()=> {
-  settings.theme = selectOption[2].value;
-});
-
-if (getData().lang) {
-  selectOption[0].value = getData().lang;
-}
-  
-if (getData().theme) {
-  selectOption[2].value = getData().theme;
-}
-  
-document.querySelector(".reset").addEventListener('click', ()=> {
-  ctmalert({
-    title: "Reset settings",
-    message: "Do you want to reset the current settings to default settings?"
-  })
-});
-  
-window.addEventListener('load', ()=> {
-  updateData();
-});
-  
-document.querySelector(".save").addEventListener('click', ()=> {
-  updateData();
-  window.location.href = ""
-});
-  
-function resetSettings() {
-  settings.lang = "English",
-  settings.newtab = false,
-  settings.newurl = false,
-  settings.favicon = true,
-  settings.theme = "light"
-  updateData();
-  window.location.href = ""
-}
-  
-function ctmalert(res) {
-  var ctmalert = document.createElement("div");
-  ctmalert.classList.add("ctm-alert");
-  ctmalert.innerHTML = `<div class="box"><div class="title">${res.title || "Title"}</div><div class="snippet">${res.message || "Message"}</div><div class="button-wrap"><button class="no" onclick="closectm()">Cancel</button><button class="yes" onclick="closectm();callback('ok')">Ok</button></div></div>`;
-  document.body.appendChild(ctmalert);
-  document.body.style.overflow = "hidden";
-}
-
-function closectm() {
-  setTimeout(()=> {
-    document.querySelector(".ctm-alert").remove();
-    document.body.style.removeProperty("overflow");
-  }, 100);
-}
-
-function callback(response) {
-  if (response === "ok") {
-    resetSettings();
-  }
-}
-
-var language = {
-  "All settings": "Semua pengaturan",
-  "Save Settings": "Simpan pengaturan",
-  "Reset Settings": "Atur ulang",
-  "Open Link in New Tab": "Buka Tautan di Tab Baru",
-  "Opens search results in a new tab.": "Membuka hasil pencarian di tab baru.",
-  "New url style": "Gaya url baru",
-  "Show full url not show as domain.": "Tampilkan url lengkap bukan tampilkan sebagai domain.",
-  "Language": "Bahasa",
-  "Change site language.": "Ubah bahasa situs.",
-  "The language may not be completely accurate.": "Bahasanya mungkin tidak sepenuhnya akurat.",
-  "Site icon": "Ikon situs",
-  "Displays a favicon on the left side of the results.": "Menampilkan favicon di sisi kiri hasil.",
-  "HTTP request method": "Metode permintaan HTTP",
-  "Set your search method with POST or GET.": "Tetapkan metode pencarian Anda dengan POST atau GET.",
-  "Theme": "Tema",
-  "Set the appearance of the site interface to dark or light.": "Atur tampilan antarmuka situs menjadi gelap atau terang."
-};
-
-allElement = document.querySelectorAll("*");
-
-allElement.forEach(elm => {
-  if (getData().lang == "Indonesia" && language[elm.innerHTML]) {
-    elm.innerHTML = language[elm.innerHTML];
-    document.querySelector("html").setAttribute("lang", "id");
-  }
-});
-
-</script>

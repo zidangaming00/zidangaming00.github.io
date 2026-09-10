@@ -461,7 +461,7 @@ const UI = {
         if (!document.querySelector(".footer")) {
             document.querySelector(".results-section").insertAdjacentHTML('beforeend', `
                 <section class="footer">
-                    <ul class="list"><li><a href="/settings">Settings</a></li><li><a href="/">Privacy</a></li><li><a href="/search?q=translate">Translate</a></li></ul>
+                    <ul class="list"><li><a href="/settings">Settings</a></li><li><a href="/privacy">Privacy</a></li><li><a href="/search?q=translate">Translate</a></li></ul>
                     <div class="copyright">©Copyright ${new Date().getFullYear()}</div>
                 </section>
             `);

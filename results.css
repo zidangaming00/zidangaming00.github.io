@@ -208,6 +208,7 @@
   background: var(--color-white);
   font-family: 'Verio Sans', Roboto-Medium, sans-serif;
   font-weight: 500;
+   margin-bottom: 8px;
 }
 .related-search .title { font-size: 20px; margin: 5px 0; }
 

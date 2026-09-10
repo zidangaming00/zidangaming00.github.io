@@ -355,7 +355,7 @@ const UI = {
           display: flex; 
           justify-content: center; 
           align-items: center; 
-          background: transparent; 
+          background: #fff;
           padding: 8px 12px; 
           margin: 0; 
           width: 100%; 
@@ -602,20 +602,21 @@ async function checkInstantAnswers() {
     } catch(e) {}
 }
 
-function handlePaginationUi(cmd, res) {
-    const wrapper = document.querySelector(".show-wrapper");
-    if (!wrapper) return;
-
-    if (cmd !== "stop" && Config.startIndex < Config.maxIndex) {
-        wrapper.innerHTML = `<div class="loader"><svg class="circular" viewBox="25 25 50 50"><circle cx="50" cy="50" r="20" fill="none" stroke-width="4"/></svg></div>`;
-        Config.startIndex += 10;
-        setTimeout(performSearch, 500);
-    } else if (Config.startIndex >= Config.maxIndex || !res?.queries?.nextPage) {
-        wrapper.remove();
-    } else {
-        wrapper.innerHTML = `<div class="mXsk8"></div><button class="more">${getText("more")}</button>`;
-    }
+function handlePaginationUi(cmd, res) { 
+  const wrapper = document.querySelector(".show-wrapper"); 
+  if (!wrapper) return; 
+  if (cmd === "start") { 
+    // Memunculkan kembali animasi loading circle saat tombol dipencet
+    wrapper.innerHTML = `<div class="loader"><svg class="circular" viewBox="25 25 50 50"><circle class="path" cx="50" cy="50" r="20" fill="none" stroke-width="4" stroke-miterlimit="10"/></svg></div>`; 
+    Config.startIndex += 10; 
+    setTimeout(performSearch, 500); 
+  } else if (Config.startIndex >= Config.maxIndex || !res?.queries?.nextPage) { 
+    wrapper.remove(); 
+  } else { 
+    wrapper.innerHTML = `<div class="mXsk8"></div><button class="more">${getText("more")}</button>`; 
+  } 
 }
+
 
 function handlePagination() { handlePaginationUi("start"); }
 

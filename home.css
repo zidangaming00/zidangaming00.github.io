@@ -1,0 +1,112 @@
+/* ==========================================================================
+   HOME.CSS
+   Halaman utama (kotak search besar + shortcut link). Dulu c2083.css.
+   Hanya di-load di "/", jadi base.css tetap wajib di-load duluan
+   (reset & token warna sudah ada di sana — tidak diulang di sini).
+   ========================================================================== */
+
+html, body { background: #f5f8fa; overflow: hidden; }
+
+.home {
+  width: 100%;
+  margin-top: 150px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.home form { position: relative; width: 80%; }
+.home .search-box { display: flex; align-items: center; justify-content: center; width: 100%; }
+.home form .search-box {
+  border: 2px solid #e3e3e3;
+  border-radius: 22px;
+  box-shadow: 0px 1px 5px rgba(0,0,0,0.1);
+  background: #fff;
+  transition: all .2s;
+}
+.home form .search-box:focus-within,
+.home form .search-box.active { border-color: var(--color-title); }
+.home form .search-box.active { border-radius: 22px 22px 0 0; }
+
+.home form input {
+  width: 100%; height: 45px; outline: none; border: none; background: transparent; font-size: 16px;
+}
+
+.home .btn-box {
+  width: 45px; height: 45px; border: none; cursor: pointer;
+  background-image: url("/images/search.png");
+  background-size: 20px; background-repeat: no-repeat; background-position: center;
+  background-color: transparent;
+}
+.home .btn-box.btn-box--clear {
+  background-image: url('data:image/svg+xml;charset=utf-8;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPScyMCcgaGVpZ2h0PScyMCcgZmlsbD0nbm9uZSc+PHBhdGggZD0nTTE0IDQuMjVhLjc1Ljc1IDAgMCAxIC4xMDIgMS40OTNMMTQgNS43NUg1Ljc1VjE0YS43NS43NSAwIDAgMS0xLjQ5My4xMDJMNC4yNSAxNFY1QS43NS43NSAwIDAgMSA1IDQuMjVoOXpNNi40NDYgNS4zOTdsLjA4NC4wNzMgOSA5YS43NDkuNzQ5IDAgMCAxLS45NzYgMS4xMzNsLS4wODQtLjA3My05LTlhLjc0OS43NDkgMCAwIDEgLjk3Ni0xLjEzM3pNNS4yNSA0LjI1djFoLTF2LTFoMXonIGZpbGw9JyNCMEI5QzEnLz48L3N2Zz4=');
+}
+.home .btn-box.btn-box--left { left: 0; }
+
+@media (min-width: 768px) {
+  .home form { max-width: 500px; }
+  .home .img-logo { height: 120px; }
+  .home { margin-top: 88px; }
+}
+
+.home__links {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px 0;
+  margin-top: 20px;
+  max-width: 250px;
+  list-style: none;
+}
+.home__links li a {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px 0;
+  color: black;
+  text-decoration: none;
+  transition: all .2s;
+  font-size: 12px;
+  -webkit-tap-highlight-color: transparent;
+}
+.home__links li:active a { filter: brightness(90%); }
+.home__links li a b { font-weight: 500; }
+
+.home__links .icon {
+  width: 50px; height: 50px;
+  background: #fff;
+  border: 1px solid #ededed;
+  border-radius: 50%;
+  user-select: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.home__links .icon svg { width: 20px; fill: #494949; }
+.home__links .icon span { font-size: 16px; color: #494949; text-shadow: 0.1px 0 0 #000, -0.1px 0 0 #000; }
+
+/* --------------------------------------------------------------------
+   Autocomplete saran pencarian
+   -------------------------------------------------------------------- */
+
+.search-suggest {
+  position: absolute;
+  border: 2px solid var(--color-title);
+  border-radius: 0 0 22px 22px;
+  box-shadow: 0px 1px 5px rgba(0,0,0,0.1);
+  top: 100%;
+  display: none;
+  height: auto;
+  max-height: 300px;
+  background: #fff;
+  overflow: auto;
+  border-top: none;
+  width: 100%;
+}
+.search-suggest.active { display: block; }
+.search-suggest ul li { cursor: pointer; display: flex; align-items: center; transition: all .1s ease-in; overflow: hidden; }
+.search-suggest ul li:hover { background: #edf3fc; }
+.search-suggest ul li a { padding: 8px 40px; width: 100%; font-size: 16px; }
+.search-suggest ul li span { white-space: nowrap; text-overflow: ellipsis; max-width: calc(100% - 20px); overflow: hidden; }
+.search-suggest ul li button { right: 0; position: absolute; }

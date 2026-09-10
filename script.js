@@ -238,54 +238,58 @@ const Widgets = {
         }
     },
 
-    checkVideoWidget: async () => {
-    try {
-      const data = await API.fetchVideo(Config.q, 3); // Ambil 3-4 video teratas
-      if (!data.items || !data.items.length) return;
+// Di dalam objek Widgets:
+checkVideoWidget: async () => {
+  const slot = document.getElementById("dynamic-video-widget-slot");
+  if (!slot) return;
 
-      const mainResultContainer = document.querySelector(".main-result .result");
-      if (!mainResultContainer) return;
+  try {
+    const data = await API.fetchVideo(Config.q, 3);
+    if (!data.items || !data.items.length) {
+      slot.remove(); // Hapus slot jika ternyata tidak ada video
+      return;
+    }
 
-      let videoItemsHTML = "";
-      data.items.slice(0, 3).forEach(item => {
-        const videoId = item.id.videoId || item.id;
-        const title = Utils.escapeHTML(item.snippet.title);
-        const thumb = item.snippet.thumbnails.medium.url;
-        const channel = Utils.escapeHTML(item.snippet.channelTitle);
-        const timeAgo = Utils.timeAgo(item.snippet.publishTime);
+    let videoItemsHTML = "";
+    data.items.slice(0, 3).forEach(item => {
+      const videoId = item.id.videoId || item.id;
+      const title = Utils.escapeHTML(item.snippet.title);
+      const thumb = item.snippet.thumbnails.medium.url;
+      const channel = Utils.escapeHTML(item.snippet.channelTitle);
+      const timeAgo = Utils.timeAgo(item.snippet.publishTime);
 
-        videoItemsHTML += `
-          <div class="video-widget-item" style="display: flex; gap: 12px; margin-bottom: 12px; align-items: center;">
-            <a href="https://youtube.com/watch?v=${videoId}" style="display: flex; gap: 12px; text-decoration: none; color: inherit; width: 100%;">
-              <div style="position: relative; flex-shrink: 0; width: 140px; height: 80px; border-radius: 8px; overflow: hidden; background: #000;">
-                <img src="${thumb}" style="width: 100%; height: 100%; object-fit: cover;">
-              </div>
-              <div style="display: flex; flex-direction: column; justify-content: center; overflow: hidden;">
-                <div style="font-size: 14px; font-weight: 500; line-height: 1.3; color: #1a0dab; margin-bottom: 4px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">${title}</div>
-                <div style="font-size: 12px; color: #5f6368;">YouTube · ${channel}</div>
-                <div style="font-size: 12px; color: #70757a; margin-top: 2px;">${timeAgo}</div>
-              </div>
-            </a>
-          </div>
-        `;
-      });
-
-      const widgetHTML = `
-        <div class="tab-result VtuHV eb8xCva" style="background: #fff; border-radius: 12px; padding: 16px; margin-bottom: 16px; border: 1px solid #dfe1e5;">
-          <div class="title" style="font-size: 20px; font-weight: 400; margin-bottom: 12px; color: #202124;">${getText("vidTitle")}</div>
-          <div class="PbNgks">${videoItemsHTML}</div>
-          <div style="border-top: 1px solid #dfe1e5; margin-top: 8px; padding-top: 12px; text-align: center;">
-            <a href="/search?q=${encodeURIComponent(Config.q)}&tbm=vid${searchLangParam}" style="color: #1a0dab; font-weight: 500; text-decoration: none; font-size: 14px;">Video lainnya ›</a>
-          </div>
+      videoItemsHTML += `
+        <div class="video-widget-item" style="display: flex; gap: 12px; margin-bottom: 12px; align-items: center;">
+          <a href="https://youtube.com/watch?v=${videoId}" style="display: flex; gap: 12px; text-decoration: none; color: inherit; width: 100%;">
+            <div style="position: relative; flex-shrink: 0; width: 140px; height: 80px; border-radius: 8px; overflow: hidden; background: #000;">
+              <img src="${thumb}" style="width: 100%; height: 100%; object-fit: cover;">
+            </div>
+            <div style="display: flex; flex-direction: column; justify-content: center; overflow: hidden;">
+              <div style="font-size: 14px; font-weight: 500; line-height: 1.3; color: #1a0dab; margin-bottom: 4px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">${title}</div>
+              <div style="font-size: 12px; color: #5f6368;">YouTube · ${channel}</div>
+              <div style="font-size: 12px; color: #70757a; margin-top: 2px;">${timeAgo}</div>
+            </div>
+          </a>
         </div>
       `;
+    });
 
-      // Masukkan widget video ke dalam wadah hasil utama
-      mainResultContainer.insertAdjacentHTML('beforeend', widgetHTML);
-    } catch (err) {
-      console.log("Gagal memuat widget video:", err);
-    }
-  },
+    // Isi slot kosong dengan widget video yang sudah jadi
+    slot.className = "tab-result VtuHV eb8xCva";
+    slot.style.cssText = "background: #fff; border-radius: 12px; padding: 16px; margin-bottom: 16px; border: 1px solid #dfe1e5;";
+    slot.innerHTML = `
+      <div class="title" style="font-size: 20px; font-weight: 400; margin-bottom: 12px; color: #202124;">${getText("vidTitle")}</div>
+      <div class="PbNgks">${videoItemsHTML}</div>
+      <div style="border-top: 1px solid #dfe1e5; margin-top: 8px; padding-top: 12px; text-align: center;">
+        <a href="/search?q=${encodeURIComponent(Config.q)}&tbm=vid${searchLangParam}" style="color: #1a0dab; font-weight: 500; text-decoration: none; font-size: 14px;">Video lainnya ›</a>
+      </div>
+    `;
+  } catch (err) {
+    slot.remove();
+    console.log("Gagal memuat widget video:", err);
+  }
+},
+
 
     initCalculator: () => {
         const calculatorBox = document.querySelector(".calculator");
@@ -582,65 +586,83 @@ function renderNews(res) {
     if (Config.startIndex === 1) UI.renderFooter();
 }
 
+// ==========================================
+// KODE YANG SUDAH DISESUAIKAN (BAGIAN RENDER WEB & WIDGET VIDEO)
+// ==========================================
+
 function renderWebResults(res) {
-    const container = document.querySelector(".main-result .result");
-    const isFirstPage = Config.startIndex === 1;
-    
-    if (!res.items) { if (isFirstPage) UI.renderEmptyState(); return; }
-
-    if (isFirstPage) {
-        if (Config.windowWidth > 700) {
-            document.querySelector(".main-result").insertAdjacentHTML('afterbegin', `<div class="WsXZp"><div class="result-stats">${isIdLang ? `Sekitar ${res.searchInformation.formattedTotalResults} hasil (${res.searchInformation.formattedSearchTime} detik)` : `Approximately ${res.searchInformation.formattedTotalResults} result (${res.searchInformation.formattedSearchTime} seconds)`}</div></div>`);
-        }
-        if (res.spelling) {
-            container.insertAdjacentHTML('beforeend', `<div class="corrected-word tab-result eb8xCva"><div class="snippet">${getText("correct")} <a href="/search?q=${encodeURIComponent(res.spelling.correctedQuery)}${searchLangParam}">${res.spelling.correctedQuery}</a><span>?</span></div></div>`);
-        }
-        Widgets.renderWidgets();
-        Widgets.checkVideoWidget();
+  const container = document.querySelector(".main-result .result");
+  const isFirstPage = Config.startIndex === 1;
+  if (!res.items) {
+    if (isFirstPage) UI.renderEmptyState();
+    return;
+  }
+  if (isFirstPage) {
+    if (Config.windowWidth > 700) {
+      document.querySelector(".main-result").insertAdjacentHTML('afterbegin', `<div class="WsXZp"><div class="result-stats">${isIdLang ? `Sekitar ${res.searchInformation.formattedTotalResults} hasil (${res.searchInformation.formattedSearchTime} detik)` : `Approximately ${res.searchInformation.formattedTotalResults} result (${res.searchInformation.formattedSearchTime} seconds)`}</div></div>`);
     }
+    if (res.spelling) {
+      container.insertAdjacentHTML('beforeend', `<div class="corrected-word tab-result eb8xCva"><div class="snippet">${getText("correct")} <a href="/search?q=${encodeURIComponent(res.spelling.correctedQuery)}${searchLangParam}">${res.spelling.correctedQuery}</a><span>?</span></div></div>`);
+    }
+    Widgets.renderWidgets();
+  }
 
-    res.items.forEach((item, i) => {
-        const originUrl = new URL(item.link);
-        const siteName = item.pagemap?.metatags?.[0]?.['og:site_name'] || item.displayLink;
-        const snippet = item.pagemap?.question?.[0]?.text ? `${Utils.dateConversion(item.pagemap.question[0].datecreated, true)} - ${Utils.escapeHTML(item.pagemap.question[0].text)}` : Utils.escapeHTML(item.snippet);
-        
-        container.insertAdjacentHTML('beforeend', `
-            <div class="VtuHV Kj7VF tab-result eb8xCva">
-                <div class="CeWka NbkAw">
-                    <div class="tab-link">
-                        <a href="${item.link}">
-                            <div class="top">
-                                <div class="favicon"><img src="https://t0.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=${item.link}&size=64"></div>
-                                <div class="link-rw"><div class="link">${siteName}</div><div class="link k">${item.displayLink}</div></div>
-                            </div>
-                            <div class="title">${Utils.escapeHTML(item.title)}</div>
-                        </a>
-                    </div>
-                    <div class="btm-snpt"><div class="snippet rawr"><span>${snippet || getText("noSiteInfo")}</span></div></div>
-                </div>
-            </div>
-        `);
+  res.items.forEach((item, i) => {
+    const originUrl = new URL(item.link);
+    const siteName = item.pagemap?.metatags?.[0]?.['og:site_name'] || item.displayLink;
+    const snippet = item.pagemap?.question?.[0]?.text ? `${Utils.dateConversion(item.pagemap.question[0].datecreated, true)} - ${Utils.escapeHTML(item.pagemap.question[0].text)}` : Utils.escapeHTML(item.snippet);
+    
+    container.insertAdjacentHTML('beforeend', `
+      <div class="VtuHV Kj7VF tab-result eb8xCva">
+        <div class="CeWka NbkAw">
+          <div class="tab-link">
+            <a href="${item.link}">
+              <div class="top">
+                <div class="favicon"><img src="https://t0.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=${item.link}&size=64"></div>
+                <div class="link-rw"><div class="link">${siteName}</div><div class="link k">${item.displayLink}</div></div>
+              </div>
+              <div class="title">${Utils.escapeHTML(item.title)}</div>
+            </a>
+          </div>
+          <div class="btm-snpt"><div class="snippet rawr"><span>${snippet || getText("noSiteInfo")}</span></div></div>
+        </div>
+      </div>
+    `);
+
+    // 1. RESERVASI TEMPAT: Sisipkan slot kosong tepat setelah hasil web ke-2 (Indeks 1)
+    if (i === 1 && isFirstPage) {
+      container.insertAdjacentHTML('beforeend', `<div id="dynamic-video-widget-slot"></div>`);
+    }
+  });
+
+  // Jika hasil web kurang dari 2, taruh slot di bagian akhir
+  if (res.items.length < 2 && isFirstPage) {
+    container.insertAdjacentHTML('beforeend', `<div id="dynamic-video-widget-slot"></div>`);
+  }
+
+  // 2. Jalankan pemuatan video secara asynchronous di background
+  if (isFirstPage) {
+    Widgets.checkVideoWidget();
+  }
+
+  if (res.queries?.nextPage && isFirstPage) {
+    document.querySelector(".main-result").insertAdjacentHTML('beforeend', `<div class="show-wrapper"><button class="more">${getText("more")}</button></div>`);
+  }
+
+  if (isFirstPage) {
+    UI.renderFooter();
+    API.fetchSuggestions(Config.q).then(sug => {
+      if(sug.suggestions && sug.suggestions.length) {
+        const list = sug.suggestions.slice(0,5).map(s => `<a href="/search?q=${s}" class="related">${Utils.capitalize(s)}</a>`).join("");
+        container.insertAdjacentHTML('beforeend', `<div class="related-search VtuHV"><div class="YjKdl"><div class="title">${getText("related")}</div></div><div class="search-list">${list}</div></div>`);
+      }
     });
+  } 
+  handlePaginationUi("stop", res);
 
-    if (res.queries?.nextPage && isFirstPage) {
-        document.querySelector(".main-result").insertAdjacentHTML('beforeend', `<div class="show-wrapper"><button class="more">${getText("more")}</button></div>`);
-    }
-
-    if (isFirstPage) {
-        UI.renderFooter();
-        API.fetchSuggestions(Config.q).then(sug => {
-            if(sug.suggestions && sug.suggestions.length) {
-                const list = sug.suggestions.slice(0,5).map(s => `<a href="/search?q=${s}" class="related">${Utils.capitalize(s)}</a>`).join("");
-                container.insertAdjacentHTML('beforeend', `<div class="related-search VtuHV"><div class="YjKdl"><div class="title">${getText("related")}</div></div><div class="search-list">${list}</div></div>`);
-            }
-        });
-    }
-    
-    handlePaginationUi("stop", res);
-    
-    // Buka di tab baru (Pengaturan)
-    if (settings.newtab) document.querySelectorAll(".main-result a").forEach(a => a.target = "_blank");
+  if (settings.newtab) document.querySelectorAll(".main-result a").forEach(a => a.target = "_blank");
 }
+
 
 async function checkInstantAnswers() {
     const queryMap = { "yahoo": "yahoo!", "notch": "markus persson", "bing": "microsoft bing", "bard": "google bard", "apple": "apple inc", "ronaldo": "cristiano ronaldo", "messi": "lionel messi" };

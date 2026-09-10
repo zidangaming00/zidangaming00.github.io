@@ -212,7 +212,7 @@ input[type="search"]::-webkit-search-results-decoration {
    Result wrapper (dipakai semua mode: web/news/gambar/video)
    -------------------------------------------------------------------- */
 
-.result-wrapper { width: 100%; padding: 0 4px 20px; }
+.result-wrapper { width: 100%; padding: 0 0 20px; }
 
 .main-result {
   position: relative;

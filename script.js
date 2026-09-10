@@ -360,10 +360,31 @@ const UI = {
                 </div>
             </div>
             <style>
-                .logo#main-lgx img{width:100px;height:45px;}.logo#main-lgx{display:flex;justify-content:center;background:#fff;padding-top:8px}
-                @media (min-width:780px){.logo#main-lgx{position:absolute;top:6px;left:0;padding:8px 12px}}
-                @media (max-width:940.9px){.logo#main-lgx{visibility:hidden}}
-            </style>`;
+                .logo#main-lgx {
+                    display: flex;
+                    justify-content: flex-start;
+                    align-items: center;
+                    background: transparent;
+                    padding: 4px 12px;
+                    margin-bottom: 8px;
+                }
+                .logo#main-lgx img {
+                    width: 85px;
+                    height: auto;
+                    max-height: 35px;
+                    object-fit: contain;
+                }
+                /* Penyesuaian saat mode desktop/layar lebar */
+                @media (min-width: 780px) {
+                    .logo#main-lgx {
+                        position: absolute;
+                        top: 10px;
+                        left: 10px;
+                        margin-bottom: 0;
+                        padding: 0;
+                    }
+                }
+            </style>
             
         UI.setupEventListeners();
     },

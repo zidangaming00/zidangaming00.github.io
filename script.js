@@ -573,7 +573,7 @@ function renderWebResults(res) {
                     <div class="tab-link">
                         <a href="${item.link}">
                             <div class="top">
-                                <div class="favicon"><img src="https://t0.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&url=${item.link}"></div>
+                                <div class="favicon"><img src="https://t0.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=${item.link}&size=64"></div>
                                 <div class="link-rw"><div class="link">${siteName}</div><div class="link k">${item.displayLink}</div></div>
                             </div>
                             <div class="title">${Utils.escapeHTML(item.title)}</div>

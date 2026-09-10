@@ -238,6 +238,55 @@ const Widgets = {
         }
     },
 
+    checkVideoWidget: async () => {
+    try {
+      const data = await API.fetchVideo(Config.q, 3); // Ambil 3-4 video teratas
+      if (!data.items || !data.items.length) return;
+
+      const mainResultContainer = document.querySelector(".main-result .result");
+      if (!mainResultContainer) return;
+
+      let videoItemsHTML = "";
+      data.items.slice(0, 3).forEach(item => {
+        const videoId = item.id.videoId || item.id;
+        const title = Utils.escapeHTML(item.snippet.title);
+        const thumb = item.snippet.thumbnails.medium.url;
+        const channel = Utils.escapeHTML(item.snippet.channelTitle);
+        const timeAgo = Utils.timeAgo(item.snippet.publishTime);
+
+        videoItemsHTML += `
+          <div class="video-widget-item" style="display: flex; gap: 12px; margin-bottom: 12px; align-items: center;">
+            <a href="https://youtube.com/watch?v=${videoId}" style="display: flex; gap: 12px; text-decoration: none; color: inherit; width: 100%;">
+              <div style="position: relative; flex-shrink: 0; width: 140px; height: 80px; border-radius: 8px; overflow: hidden; background: #000;">
+                <img src="${thumb}" style="width: 100%; height: 100%; object-fit: cover;">
+              </div>
+              <div style="display: flex; flex-direction: column; justify-content: center; overflow: hidden;">
+                <div style="font-size: 14px; font-weight: 500; line-height: 1.3; color: #1a0dab; margin-bottom: 4px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">${title}</div>
+                <div style="font-size: 12px; color: #5f6368;">YouTube · ${channel}</div>
+                <div style="font-size: 12px; color: #70757a; margin-top: 2px;">${timeAgo}</div>
+              </div>
+            </a>
+          </div>
+        `;
+      });
+
+      const widgetHTML = `
+        <div class="tab-result VtuHV eb8xCva" style="background: #fff; border-radius: 12px; padding: 16px; margin-bottom: 16px; border: 1px solid #dfe1e5;">
+          <div class="title" style="font-size: 20px; font-weight: 400; margin-bottom: 12px; color: #202124;">${getText("vidTitle")}</div>
+          <div class="PbNgks">${videoItemsHTML}</div>
+          <div style="border-top: 1px solid #dfe1e5; margin-top: 8px; padding-top: 12px; text-align: center;">
+            <a href="/search?q=${encodeURIComponent(Config.q)}&tbm=vid${searchLangParam}" style="color: #1a0dab; font-weight: 500; text-decoration: none; font-size: 14px;">Video lainnya ›</a>
+          </div>
+        </div>
+      `;
+
+      // Masukkan widget video ke dalam wadah hasil utama
+      mainResultContainer.insertAdjacentHTML('beforeend', widgetHTML);
+    } catch (err) {
+      console.log("Gagal memuat widget video:", err);
+    }
+  },
+
     initCalculator: () => {
         const calculatorBox = document.querySelector(".calculator");
         if (!calculatorBox) return;
@@ -547,6 +596,7 @@ function renderWebResults(res) {
             container.insertAdjacentHTML('beforeend', `<div class="corrected-word tab-result eb8xCva"><div class="snippet">${getText("correct")} <a href="/search?q=${encodeURIComponent(res.spelling.correctedQuery)}${searchLangParam}">${res.spelling.correctedQuery}</a><span>?</span></div></div>`);
         }
         Widgets.renderWidgets();
+        Widgets.checkVideoWidget();
     }
 
     res.items.forEach((item, i) => {

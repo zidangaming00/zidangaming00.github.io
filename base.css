@@ -18,7 +18,7 @@
   padding: 0;
   margin: 0;
   box-sizing: border-box;
-  text-size-adjust: none;
+  text-size-adjust: 100%;
   font-family: 'Verio Sans', Roboto, sans-serif;
 }
 
@@ -278,7 +278,6 @@ input[type="search"]::-webkit-search-results-decoration {
   font-size: 16px;
   outline: none;
   color: var(--color-text-dark);
-  flex-shrink: 0;
 }
 
 .sug-clear-btn {

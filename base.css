@@ -264,6 +264,7 @@ input[type="search"]::-webkit-search-results-decoration {
   flex: 1;
   display: flex;
   align-items: center;
+  height: 40px;
   background: var(--color-bg-alt);
   border-radius: 24px;
   padding: 6px 14px;

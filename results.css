@@ -164,33 +164,43 @@
 .corrected-word .spelling { color: var(--color-title); -webkit-tap-highlight-color: rgba(0,0,0,.10); }
 
 /* --------------------------------------------------------------------
-   Instant answer (Refined Mobile & Desktop Style)
+   Instant answer (Mobile: Sharp Border Top/Bottom | Desktop: Rounded Card)
    -------------------------------------------------------------------- */
 
 .instant-answer {
-  border: 1px solid var(--color-border);
-  border-radius: 20px; /* Lebih rounded */
-  padding: 14px 16px;
-  margin-bottom: 12px;
+  border-radius: 0;
+  border-top: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
+  border-left: none;
+  border-right: none;
+  padding: 16px;
+  margin-bottom: 8px;
   background: var(--color-white);
   box-shadow: none;
 }
 
 .instant-answer .title {
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 400;
   color: var(--color-text-dark);
-  margin: 0 0 10px 0;
+  margin: 0 0 12px 0;
   line-height: 1.2;
 }
 
 .instant-answer .logo {
   width: 100%;
-  height: 140px; /* Gambar diperkecil agar tidak terlalu tinggi/besar */
+  height: 140px;
   object-fit: contain;
   background: var(--color-bg-alt);
+  border-radius: 8px;
+  margin-bottom: 14px;
+}
+
+.instant-answer .summary-box {
+  background: var(--color-bg-alt);
   border-radius: 12px;
-  margin-bottom: 10px;
+  padding: 12px 14px;
+  margin-bottom: 12px;
 }
 
 .instant-answer__section-title {
@@ -200,13 +210,6 @@
   margin-bottom: 4px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-}
-
-.instant-answer .summary-box {
-  background: var(--color-bg-alt);
-  border-radius: 14px; /* Lebih rounded */
-  padding: 12px 14px;
-  margin-bottom: 10px;
 }
 
 .instant-answer .summary-text {
@@ -236,7 +239,7 @@
 
 .instant-answer .infobox-item {
   background: var(--color-bg-alt);
-  border-radius: 14px; /* Lebih rounded */
+  border-radius: 12px;
   padding: 10px 12px;
   display: flex;
   flex-direction: column;
@@ -259,11 +262,14 @@
   text-overflow: ellipsis;
 }
 
+/* Khusus Tampilan Desktop (Sidebar) tetap bergaya kartu rounded */
 @media (min-width: 780px) {
   .instant-answer { 
     width: 310px; 
-    border-radius: 20px; 
+    border: 1px solid var(--color-border);
+    border-radius: 16px; 
     margin-left: 20px; 
+    box-shadow: none; 
   }
   .results-list .instant-answer { display: none; }
 }
@@ -283,6 +289,7 @@ body.dark .instant-answer .infobox-item {
 body.dark .instant-answer .logo {
   background: #191a1d;
 }
+
 
 /* --------------------------------------------------------------------
    Related search

@@ -145,7 +145,7 @@ const API = {
 // 5. WIDGETS & INSTANT ANSWERS
 // ==========================================
 const Widgets = {
-            renderInstantCard: (res) => {
+    renderInstantCard: (res) => {
         if (!res.snippet || res.snippet.length <= 100) return;
         const container = document.createElement("div");
         container.className = "instant-answer";
@@ -174,8 +174,8 @@ const Widgets = {
         container.innerHTML = `
             <div class="title">${res.title}</div>
             ${imageHtml}
-            <div class="instant-answer__section-title">Ringkasan</div>
             <div class="summary-box">
+                <div class="instant-answer__section-title">Ringkasan</div>
                 <div class="summary-text">
                     <span class="snippet">${res.snippet.replace(/\<\/?(pre|code).*?\/?\>/g, "").slice(0, 220)}... </span>
                     <a href="${res.sourceUrl}" class="wikipedia">${res.source} ›</a>
@@ -200,7 +200,6 @@ const Widgets = {
             }
         }
     },
-
 
     renderWidgets: () => {
         const query = Config.q.toLowerCase();

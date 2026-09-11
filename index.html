@@ -171,6 +171,12 @@
       justify-content: center;
     }
 
+    .autofill-btn svg {
+      fill: var(--text-muted);
+      width: 18px;
+      height: 18px;
+    }
+
     /* Shortcuts Grid */
     .shortcuts-grid {
       display: grid;
@@ -524,7 +530,7 @@
         btnArrow.className = 'autofill-btn';
         btnArrow.title = 'Isi ke pencarian';
         btnArrow.innerHTML = `
-          <svg viewBox="0 0 24 24"><path d="M5 15h12.17l-5.59 5.59L13 22l8-8-8-8-1.41 1.41L17.17 13H5v2z"/></svg>
+          <svg viewBox="0 0 24 24"><path d="M6 6v2h8.59L5 17.59 6.41 19 16 9.41V18h2V6H6z"/></svg>
         `;
 
         btnArrow.addEventListener('click', (e) => {

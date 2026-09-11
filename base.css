@@ -60,6 +60,11 @@ body.dark .result-card .favicon img {
   mix-blend-mode: normal;
 }
 
+body.dark .related:after { 
+  background: #303134; /* Warna abu-abu gelap khas mode gelap */
+  color: #e8eaed;      /* Warna ikon di dalamnya agar tetap terlihat */
+}
+
 /* dark mode end */
 
 @media (min-width: 780px) {

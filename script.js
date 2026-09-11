@@ -30,10 +30,11 @@ const isIdLang = settings.lang === "id" || Config.hl === "id"; // pastikan menco
 const searchLangParam = isIdLang ? `&hl=${Config.hl}` : "";
 const localLang = isIdLang ? "id-ID" : "en-US";
 
-// Parameter URL persisten
+const isFaviconDisabled = Config.fv == 0 || settings.fv === 0 || settings.fv === false || settings.favicon === false || Config.fv === "0";
+
 let searchParam = "";
 searchParam += Config.uf == 1 ? "&uf=1" : "";
-searchParam += Config.fv == 0 ? "&fv=0" : "";
+searchParam += isFaviconDisabled ? "&fv=0" : ""; // <-- Tambahkan baris ini
 searchParam += Config.sf == 1 ? "&sf=1" : "";
 searchParam += Config.th == 1 ? "&th=1" : "";
 
@@ -581,7 +582,7 @@ function renderWebResults(res) {
     const siteName = item.pagemap?.metatags?.[0]?.['og:site_name'] || item.displayLink;
     const snippet = item.pagemap?.question?.[0]?.text ? `${Utils.dateConversion(item.pagemap.question[0].datecreated, true)} - ${Utils.escapeHTML(item.pagemap.question[0].text)}` : Utils.escapeHTML(item.snippet);
     
-    const faviconHtml = Config.fv == 0 ? "" : `<div class="favicon"><img src="https://t0.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=${item.link}&size=64"></div>`;
+    const faviconHtml = isFaviconDisabled ? "" : `<div class="favicon"><img src="https://t0.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=${item.link}&size=64"></div>`;
 
 container.insertAdjacentHTML('beforeend', `
   <div class="result-card result-card--flat">
@@ -661,15 +662,6 @@ function handlePaginationUi(cmd, res) {
 
 function handlePagination() { handlePaginationUi("start"); }
 
-// Restore Scroll Position
-if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
-window.addEventListener('beforeunload', () => sessionStorage.setItem(`scrollPos:${location.href}`, window.scrollY));
-const restoreScroll = () => {
-    const pos = sessionStorage.getItem(`scrollPos:${location.href}`);
-    if (pos) window.scrollTo(0, parseInt(pos, 10));
-};
-
-
 // ==========================================
 // 8. INITIALIZE APPLICATION
 // ==========================================
@@ -684,7 +676,7 @@ function initApp() {
     } else if (Config.q && navigator.onLine) {
         UI.renderBase();
         UI.setupTabStyles();
-        performSearch().then(restoreScroll);
+        performSearch();
     }
 }
 

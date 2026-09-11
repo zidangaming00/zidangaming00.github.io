@@ -270,28 +270,30 @@
   </div>
 
   <script>
-  (function syncTheme() {
-    // Membaca cookie secara manual agar tidak perlu memuat seluruh cookie.js 
-    // jika hanya butuh mengecek tema dengan cepat.
-    let isDark = false;
+   (function syncTheme() {
+    let theme = 'light'; // Fallback ke tema terang sesuai DEFAULT_SETTINGS
     const cookies = document.cookie.split(';');
     for (let cookie of cookies) {
       const [key, val] = cookie.trim().split('=');
       if (key === 'settings') {
         try {
           const parsed = JSON.parse(decodeURIComponent(val));
-          if (parsed.theme === 'dark') isDark = true;
+          if (parsed.theme) theme = parsed.theme;
         } catch(e) {}
       }
     }
     
+    // Deteksi preferensi OS perangkat
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    if (isDark || (!document.cookie.includes('settings=') && prefersDark)) {
+    
+    // Terapkan mode gelap HANYA jika diset 'dark', ATAU diset 'system' dan perangkat sedang mode gelap
+    if (theme === 'dark' || (theme === 'system' && prefersDark)) {
       document.body.classList.add('dark');
     } else {
       document.body.classList.remove('dark');
     }
   })();
-</script>
+
+  </script>
 </body>
 </html>

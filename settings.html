@@ -372,11 +372,16 @@
     document.addEventListener('DOMContentLoaded', () => {
       const config = getData(); // Mengambil data dari cookie.js
 
-      themeSelect.value = config.theme || 'light';
-      // [Tambahan] Terapkan tema gelap jika ada di pengaturan
-      if (config.theme === 'dark') {
-        document.body.classList.add('dark');
-      }
+          themeSelect.value = config.theme || 'light';
+    
+    // Sinkronisasi untuk halaman pengaturan saat dimuat
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (config.theme === 'dark' || (config.theme === 'system' && prefersDark)) {
+      document.body.classList.add('dark');
+    } else {
+      document.body.classList.remove('dark');
+    }
+
 
       themeSelect.value = config.theme || 'light';
       langSelect.value = config.lang || 'id';
@@ -387,10 +392,20 @@
     });
 
     // Event Listener Update Opsi
-    themeSelect.addEventListener('change', (e) => {
-      updateSetting('theme', e.target.value);
-      showToast('Tema diperbarui');
-    });
+      themeSelect.addEventListener('change', (e) => {
+    const selectedTheme = e.target.value;
+    updateSetting('theme', selectedTheme);
+    
+    // Terapkan perubahan tema secara langsung (real-time)
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (selectedTheme === 'dark' || (selectedTheme === 'system' && prefersDark)) {
+      document.body.classList.add('dark');
+    } else {
+      document.body.classList.remove('dark');
+    }
+    
+    showToast('Tema diperbarui');
+  });
 
     langSelect.addEventListener('change', (e) => {
       updateSetting('lang', e.target.value);

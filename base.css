@@ -164,6 +164,146 @@ input[type="search"]::-webkit-search-results-decoration {
   border: none;
 }
 
+/* ==========================================
+   DESKTOP SUGGESTION DROPDOWN
+   ========================================== */
+.search-field {
+  position: relative;
+}
+
+.sug-desktop-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-top: none;
+  border-radius: 0 0 16px 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  z-index: 1000;
+  overflow: hidden;
+  margin-top: 2px;
+}
+
+.sug-item {
+  display: flex;
+  align-items: center;
+  padding: 10px 16px;
+  cursor: pointer;
+  font-size: 15px;
+  color: var(--color-text-dark);
+}
+
+.sug-item:hover {
+  background-color: var(--color-bg-alt);
+}
+
+.sug-icon {
+  display: flex;
+  align-items: center;
+  color: var(--color-text-muted);
+}
+
+.sug-icon.search-ic {
+  margin-right: 14px;
+}
+
+.sug-text {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sug-text strong {
+  color: var(--color-text-dark);
+}
+
+/* ==========================================
+   MOBILE FULLSCREEN SUGGESTION OVERLAY
+   ========================================== */
+.sug-mobile-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: var(--color-bg);
+  color: var(--color-text-dark);
+  z-index: 99999;
+  flex-direction: column;
+}
+
+.sug-mobile-overlay.active {
+  display: flex;
+}
+
+.sug-mobile-header {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-white);
+}
+
+.sug-back-btn {
+  background: none;
+  border: none;
+  padding: 8px;
+  cursor: pointer;
+  color: var(--color-text-muted);
+  display: flex;
+  align-items: center;
+}
+
+.sug-input-wrap {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  background: var(--color-bg-alt);
+  border-radius: 24px;
+  padding: 6px 14px;
+  margin-left: 8px;
+}
+
+.sug-mobile-input {
+  width: 100%;
+  border: none;
+  background: transparent;
+  font-size: 16px;
+  outline: none;
+  color: var(--color-text-dark);
+}
+
+.sug-clear-btn {
+  background: none;
+  border: none;
+  font-size: 20px;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  padding: 0 4px;
+}
+
+.sug-mobile-list {
+  flex: 1;
+  overflow-y: auto;
+  padding-top: 8px;
+  background: var(--color-bg);
+}
+
+.sug-mobile-list .sug-item {
+  padding: 12px 16px;
+}
+
+.sug-mobile-list .insert-ic {
+  padding: 4px;
+  margin-left: 8px;
+  color: var(--color-text-muted);
+}
+
+
 /* --------------------------------------------------------------------
    Tab nav (search-menu)
    -------------------------------------------------------------------- */

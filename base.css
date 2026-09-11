@@ -42,6 +42,19 @@
   --page-gutter: 130px;
 }
 
+body.dark {
+  --color-title: #8ab4f8;
+  --color-text: #BDC1C4;
+  --color-text-muted: #9BA0A6;
+  --color-text-dark: #E9EAEE;
+  --color-border: #24282B;
+  --color-border-alt: #24282B;
+  --color-bg: #171717;
+  --color-bg-alt: #202125;
+  --color-white: #202125;
+  --card-shadow: none;
+}
+
 @media (min-width: 780px) {
   :root { --color-title: #1A0DAB; }
 }

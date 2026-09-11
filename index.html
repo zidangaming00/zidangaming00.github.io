@@ -31,8 +31,20 @@
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* 1. Tambahkan ini di paling atas dalam <style> */
+    @font-face {
+      font-family: 'Verio Sans';
+      font-style: normal;
+      font-weight: 100 900;
+      font-display: swap;
+      src: url('/font/BRVQLLXNOS.woff2') format('woff2'),
+           url('/font/JBDCITAYMP.woff2') format('woff2');
+    }
+
+    /* 2. Ubah properti body menjadi ini */
     body {
-      font-family: 'Inter', -apple-system, sans-serif;
+      font-family: 'Verio Sans', Roboto, sans-serif;
       background-color: var(--bg);
       color: var(--text-main);
       display: flex;
@@ -193,7 +205,7 @@
       text-decoration: none;
       color: var(--text-main);
       font-size: 13px;
-      font-weight: 500;
+      font-weight: 400; /* Sebelumnya 500, kita buat lebih tipis */
       gap: 8px;
     }
     .shortcut-icon {
@@ -216,7 +228,7 @@
     /* Trending Section */
     .trending-section {
       width: 100%;
-      margin-top: 40px;
+      margin-top: 60px;
     }
     .trending-title {
       font-size: 14px;

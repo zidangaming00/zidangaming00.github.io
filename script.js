@@ -428,6 +428,8 @@ const UI = {
 
         if (!searchInput) return;
 
+        SuggestionsManager.init();
+
         // PERBAIKAN 1: Cek langsung saat halaman dimuat apakah input sudah ada isinya (dari URL)
         if (searchInput.value.trim() && clearBtn) {
             clearBtn.style.display = "block";
@@ -507,6 +509,197 @@ const UI = {
         document.title = "Error 503";
     }
 };
+
+// ==========================================
+// SUGGESTION MANAGER (MOBILE OVERLAY & DESKTOP DROPDOWN)
+// ==========================================
+const SuggestionsManager = {
+    // Cek apakah setting suggest diizinkan (default: true jika belum diatur)
+    isEnabled: () => {
+        return settings.sug !== false && settings.suggest !== false && settings.sug !== 0 && settings.suggest !== 0;
+    },
+
+    debounceTimer: null,
+
+    init: () => {
+        if (!SuggestionsManager.isEnabled()) return;
+
+        const mainInput = document.querySelector(".search-input");
+        if (!mainInput) return;
+
+        if (Config.windowWidth < 780 || Config.isMobile) {
+            // Event Mobile: saat input di-fokuskan, buka Popup Overlay
+            mainInput.addEventListener("focus", () => {
+                SuggestionsManager.openMobileOverlay(mainInput.value);
+            });
+        } else {
+            // Event Desktop: tampilkan Dropdown di bawah Search Bar
+            mainInput.addEventListener("input", (e) => {
+                const query = e.target.value.trim();
+                SuggestionsManager.handleDesktopInput(query);
+            });
+
+            mainInput.addEventListener("focus", (e) => {
+                const query = e.target.value.trim();
+                if (query) SuggestionsManager.handleDesktopInput(query);
+            });
+
+            // Tutup dropdown desktop jika klik di luar search box
+            document.addEventListener("click", (e) => {
+                if (!e.target.closest(".search-box")) {
+                    SuggestionsManager.closeDesktopDropdown();
+                }
+            });
+        }
+    },
+
+    // ---------------- MOBILE POPUP OVERLAY ----------------
+    openMobileOverlay: (initialQuery) => {
+        let overlay = document.querySelector(".sug-mobile-overlay");
+        if (!overlay) {
+            overlay = document.createElement("div");
+            overlay.className = "sug-mobile-overlay";
+            overlay.innerHTML = `
+                <div class="sug-mobile-header">
+                    <button type="button" class="sug-back-btn" id="sugBackBtn">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+                        </svg>
+                    </button>
+                    <div class="sug-input-wrap">
+                        <input type="search" class="sug-mobile-input" value="${Utils.escapeHTML(initialQuery)}" placeholder="${getText("placeholder")}" autocomplete="off" autofocus>
+                        <button type="button" class="sug-clear-btn" id="sugClearBtn" style="display:${initialQuery ? 'block' : 'none'}">&times;</button>
+                    </div>
+                </div>
+                <div class="sug-mobile-list" id="sugMobileList"></div>
+            `;
+            document.body.appendChild(overlay);
+
+            const mobInput = overlay.querySelector(".sug-mobile-input");
+            const clearBtn = overlay.querySelector("#sugClearBtn");
+            const backBtn = overlay.querySelector("#sugBackBtn");
+
+            // Event listener overlay mobile
+            backBtn.addEventListener("click", () => SuggestionsManager.closeMobileOverlay());
+            
+            clearBtn.addEventListener("click", () => {
+                mobInput.value = "";
+                mobInput.focus();
+                clearBtn.style.display = "none";
+                document.getElementById("sugMobileList").innerHTML = "";
+            });
+
+            mobInput.addEventListener("input", (e) => {
+                const val = e.target.value;
+                clearBtn.style.display = val ? "block" : "none";
+                SuggestionsManager.fetchAndRender(val.trim(), "#sugMobileList", true);
+            });
+
+            mobInput.addEventListener("keyup", (e) => {
+                if (e.key === "Enter" && mobInput.value.trim()) {
+                    window.location.href = `/search?q=${encodeURIComponent(mobInput.value.trim()).replace(/%20/g, '+')}${searchLangParam}${searchParam}`;
+                }
+            });
+        }
+
+        overlay.classList.add("active");
+        const mobInput = overlay.querySelector(".sug-mobile-input");
+        mobInput.value = initialQuery;
+        mobInput.focus();
+        if (initialQuery.trim()) {
+            SuggestionsManager.fetchAndRender(initialQuery.trim(), "#sugMobileList", true);
+        }
+    },
+
+    closeMobileOverlay: () => {
+        const overlay = document.querySelector(".sug-mobile-overlay");
+        if (overlay) overlay.classList.remove("active");
+    },
+
+    // ---------------- DESKTOP DROPDOWN ----------------
+    handleDesktopInput: (query) => {
+        if (!query) {
+            SuggestionsManager.closeDesktopDropdown();
+            return;
+        }
+        
+        let dropdown = document.querySelector(".sug-desktop-dropdown");
+        if (!dropdown) {
+            dropdown = document.createElement("div");
+            dropdown.className = "sug-desktop-dropdown";
+            document.querySelector(".search-field").appendChild(dropdown);
+        }
+        
+        SuggestionsManager.fetchAndRender(query, ".sug-desktop-dropdown", false);
+    },
+
+    closeDesktopDropdown: () => {
+        const dropdown = document.querySelector(".sug-desktop-dropdown");
+        if (dropdown) dropdown.remove();
+    },
+
+    // ---------------- FETCH & RENDER LOGIC ----------------
+    fetchAndRender: (query, targetSelector, isMobile) => {
+        clearTimeout(SuggestionsManager.debounceTimer);
+        if (!query) {
+            const el = document.querySelector(targetSelector);
+            if (el) el.innerHTML = "";
+            return;
+        }
+
+        SuggestionsManager.debounceTimer = setTimeout(async () => {
+            try {
+                const data = await API.fetchSuggestions(query);
+                const targetEl = document.querySelector(targetSelector);
+                if (!targetEl) return;
+
+                if (!data || !data.suggestions || !data.suggestions.length) {
+                    targetEl.innerHTML = "";
+                    return;
+                }
+
+                const listHtml = data.suggestions.map(sugText => {
+                    const encodedSug = encodeURIComponent(sugText).replace(/%20/g, '+');
+                    const highlightedText = sugText.toLowerCase().startsWith(query.toLowerCase())
+                        ? `<strong>${Utils.escapeHTML(sugText.slice(0, query.length))}</strong>${Utils.escapeHTML(sugText.slice(query.length))}`
+                        : Utils.escapeHTML(sugText);
+
+                    return `
+                        <div class="sug-item" onclick="window.location.href='/search?q=${encodedSug}${searchLangParam}${searchParam}'">
+                            <span class="sug-icon search-ic">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+                                </svg>
+                            </span>
+                            <span class="sug-text">${highlightedText}</span>
+                            ${isMobile ? `
+                                <span class="sug-icon insert-ic" onclick="event.stopPropagation(); SuggestionsManager.insertQuery('${Utils.escapeHTML(sugText)}')">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M5 15h2V7.83l11.88 11.88 1.41-1.41L8.41 6.5H16V4.5H5z"/>
+                                    </svg>
+                                </span>` : ''}
+                        </div>
+                    `;
+                }).join("");
+
+                targetEl.innerHTML = isMobile ? listHtml : `<div class="sug-desktop-list">${listHtml}</div>`;
+            } catch (err) {
+                console.error("Gagal mengambil suggest:", err);
+            }
+        }, 150);
+    },
+
+    insertQuery: (text) => {
+        const mobInput = document.querySelector(".sug-mobile-input");
+        if (mobInput) {
+            mobInput.value = text;
+            mobInput.focus();
+            document.querySelector("#sugClearBtn").style.display = "block";
+            SuggestionsManager.fetchAndRender(text, "#sugMobileList", true);
+        }
+    }
+};
+
 
 
 // ==========================================

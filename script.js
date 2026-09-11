@@ -146,40 +146,61 @@ const API = {
 // ==========================================
 const Widgets = {
     renderInstantCard: (res) => {
-        if (!res.snippet || res.snippet.length <= 100) return;
-        const container = document.createElement("div");
-        container.className = "instant-answer";
-        container.innerHTML = `
-            <div class="title">${res.title}</div>
-            <div class="about">
-                <span class="snippet">${res.snippet.replace(/\<\/?(pre|code).*?\/?\>/g, "").slice(0, 220)}... </span>
-                <a href="${res.sourceUrl}" class="wikipedia">${res.source}</a>
-            </div>
-            <div class="infobox"></div>
-        `;
+    if (!res.snippet || res.snippet.length <= 100) return;
+    const container = document.createElement("div");
+    container.className = "instant-answer";
 
-        const wrapper = Config.windowWidth > 780 ? document.querySelector(".sidebar-panel") || (() => {
-            const side = document.createElement("div"); side.className = "sidebar-panel";
-            document.querySelector(".result-wrapper").appendChild(side);
-            return side;
-        })() : document.querySelectorAll(".result-card")[2];
+    let imageHtml = '';
+    if (res.image) {
+        imageHtml = `<img src="${res.image}" class="logo" alt="${res.title}" ${res.type ? 'style="border:1px solid #999"' : ''}>`;
+    }
 
-        if (Config.windowWidth > 780) wrapper.appendChild(container);
-        else Utils.insertAfter(wrapper, container);
-
-        if (res.image) {
-            const img = new Image();
-            img.src = res.image;
-            img.onload = () => container.insertAdjacentHTML("afterbegin", `<img src="${res.image}" ${res.type ? 'style="border:1px solid #999"' : ''} align="right" class="logo" alt="${res.Heading}">`);
+    let infoboxHtml = '';
+    if (res.infobox && res.infobox.length > 0) {
+        const items = res.infobox.slice(0, 4).map(info => {
+            if (!info.value.trim()) return '';
+            return `
+                <div class="infobox-item">
+                    <div class="infobox-item__label">${info.label}</div>
+                    <div class="infobox-item__value">${info.value}</div>
+                </div>
+            `;
+        }).join("");
+        if (items) {
+            infoboxHtml = `<div class="infobox">${items}</div>`;
         }
+    }
 
-        if (res.infobox) {
-            const infoBox = container.querySelector(".infobox");
-            res.infobox.slice(0, 3).forEach(info => {
-                if (info.value.trim()) infoBox.innerHTML += `<span id="text_info"><b>${info.label}:</b> ${info.value}</span>`;
-            });
+    container.innerHTML = `
+        <div class="instant-answer__section-title">Ringkasan</div>
+        ${imageHtml}
+        <div class="title">${res.title}</div>
+        <div class="about">
+            <div class="snippet">${res.snippet.replace(/\<\/?(pre|code).*?\/?\>/g, "").slice(0, 220)}...</div>
+            <a href="${res.sourceUrl}" class="wikipedia">${res.source}</a>
+        </div>
+        ${infoboxHtml}
+    `;
+
+    // Menggunakan kembali logika wrapper & urutan mobile milikmu
+    const wrapper = Config.windowWidth > 780 ? document.querySelector(".sidebar-panel") || (() => {
+        const side = document.createElement("div"); side.className = "sidebar-panel";
+        document.querySelector(".result-wrapper").appendChild(side);
+        return side;
+    })() : document.querySelectorAll(".result-card")[2];
+
+    if (Config.windowWidth > 780) {
+        wrapper.appendChild(container);
+    } else {
+        if (wrapper) {
+            Utils.insertAfter(wrapper, container);
+        } else {
+            // Fallback jika result-card ke-2 tidak ada
+            document.querySelector(".main-result").appendChild(container);
         }
-    },
+    }
+},
+
 
     renderWidgets: () => {
         const query = Config.q.toLowerCase();

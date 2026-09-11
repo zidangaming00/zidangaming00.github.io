@@ -184,7 +184,7 @@
 .instant-answer .snippet { color: var(--color-text); font-size: 15px; }
 
 @media (min-width: 780px) {
-  .instant-answer { width: 310px; border-style: solid; border-radius: 8px; border-color: #ccc; margin-left: 50px; }
+  .instant-answer { width: 310px; border-style: solid; border-radius: 8px; border-color: var(--color-border); margin-left: 50px; }
   .instant-answer .infobox span { border-top: 1px solid #e3e3e3; padding-top: 8px; }
   .instant-answer .infobox span:first-child { border-top: none; }
   .results-list .instant-answer { display: none; } /* di desktop instant-answer pindah ke sidebar */

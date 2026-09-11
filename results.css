@@ -168,7 +168,7 @@
    -------------------------------------------------------------------- */
 
 .instant-answer {
-  box-shadow: 0 0 0 1px #ebedef;
+  box-shadow: 0 0 0 1px var(--color-border);
   padding: 16px;
   margin-bottom: 8px;
   background: var(--color-white);
@@ -395,7 +395,7 @@ body.dark .instant-answer,
 body.dark .news-card,
 body.dark .related-search,
 body.dark .video-widget {
-  border-color: #24282B;
+  border-color: var(--color-border);
   background: #202125;
 }
 body.dark .result-card .title { color: #8BB4F4; }

@@ -112,12 +112,11 @@
     }
 
     .brand-logo {
-      font-size: 40px;
-      font-weight: 700;
-      color: var(--accent-blue);
-      letter-spacing: -1px;
+      height: 44px; /* Menyesuaikan agar setara dengan font-size 40px sebelumnya */
       margin-bottom: 4px;
-      line-height: 1.1;
+      display: inline-block;
+pointer-events: none;
+      user-select: none;
     }
 
     .hero h1 {
@@ -198,7 +197,7 @@
         padding: 20px 16px 32px;
       }
       .brand-logo {
-        font-size: 36px;
+        height: 40px; /* Menyesuaikan ukuran di layar kecil */
       }
     }
   </style>
@@ -222,7 +221,7 @@
 
     <!-- Header dengan Logo Tengah & Presisi Jarak -->
     <header class="hero">
-      <div class="brand-logo">Deevv</div>
+      <img draggable="false" src="https://zidangaming00.github.io/images/logo.svg" alt="" class="brand-logo">
       <h1>Privasi & Keamanan</h1>
       <p>Prinsip dasar pengelolaan data dan perlindungan privasi Anda di Deevv.</p>
     </header>

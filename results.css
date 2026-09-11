@@ -164,75 +164,68 @@
 .corrected-word .spelling { color: var(--color-title); -webkit-tap-highlight-color: rgba(0,0,0,.10); }
 
 /* --------------------------------------------------------------------
-   Instant answer (Mobile Web Result Style - Straight & Border Top/Bottom)
+   Instant answer (Refined Mobile & Desktop Style)
    -------------------------------------------------------------------- */
 
 .instant-answer {
-  border-radius: 0;
-  border-top: 1px solid var(--color-border);
-  border-bottom: 1px solid var(--color-border);
-  border-left: none;
-  border-right: none;
-  padding: 16px;
-  margin-bottom: 8px;
+  border: 1px solid var(--color-border);
+  border-radius: 20px; /* Lebih rounded */
+  padding: 14px 16px;
+  margin-bottom: 12px;
   background: var(--color-white);
   box-shadow: none;
 }
 
 .instant-answer .title {
-  font-size: 22px;
+  font-size: 20px;
   font-weight: 400;
   color: var(--color-text-dark);
-  margin: 0 0 12px 0;
+  margin: 0 0 10px 0;
   line-height: 1.2;
 }
 
 .instant-answer .logo {
   width: 100%;
-  max-height: 260px;
+  height: 140px; /* Gambar diperkecil agar tidak terlalu tinggi/besar */
   object-fit: contain;
   background: var(--color-bg-alt);
-  border-radius: 8px;
-  margin-bottom: 14px;
+  border-radius: 12px;
+  margin-bottom: 10px;
 }
 
 .instant-answer__section-title {
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 500;
   color: var(--color-text-muted);
-  margin-bottom: 6px;
+  margin-bottom: 4px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
 .instant-answer .summary-box {
   background: var(--color-bg-alt);
-  border-radius: 8px;
+  border-radius: 14px; /* Lebih rounded */
   padding: 12px 14px;
-  margin-bottom: 14px;
+  margin-bottom: 10px;
 }
 
-.instant-answer .snippet {
-  color: var(--color-text);
+.instant-answer .summary-text {
   font-size: 14px;
+  color: var(--color-text);
   line-height: 1.5;
-  margin-bottom: 6px;
+  display: -webkit-box;
+  -webkit-line-clamp: 4; /* Maksimal 4 baris */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .instant-answer .wikipedia {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 13px;
-  font-weight: 500;
   color: var(--color-title);
   text-decoration: none;
-}
-
-.instant-answer .wikipedia:after {
-  content: "›";
-  font-size: 15px;
-  font-weight: bold;
+  font-weight: 500;
+  display: inline;
+  white-space: nowrap;
 }
 
 .instant-answer .infobox {
@@ -243,7 +236,7 @@
 
 .instant-answer .infobox-item {
   background: var(--color-bg-alt);
-  border-radius: 8px;
+  border-radius: 14px; /* Lebih rounded */
   padding: 10px 12px;
   display: flex;
   flex-direction: column;
@@ -266,14 +259,11 @@
   text-overflow: ellipsis;
 }
 
-/* Khusus Tampilan Desktop (Sidebar) tetap dibikin gaya card melengkung */
 @media (min-width: 780px) {
   .instant-answer { 
     width: 310px; 
-    border: 1px solid var(--color-border); 
-    border-radius: 16px; 
+    border-radius: 20px; 
     margin-left: 20px; 
-    box-shadow: none; 
   }
   .results-list .instant-answer { display: none; }
 }
@@ -285,7 +275,6 @@
 body.dark .instant-answer {
   background: #202125;
   border-color: #3c4043;
-  box-shadow: none;
 }
 body.dark .instant-answer .summary-box,
 body.dark .instant-answer .infobox-item {

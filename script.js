@@ -176,8 +176,10 @@ const Widgets = {
             ${imageHtml}
             <div class="summary-box">
                 <div class="instant-answer__section-title">Ringkasan</div>
-                <div class="summary-text">${res.snippet.replace(/\<\/?(pre|code).*?\/?\>/g, "").slice(0, 150)}...</div>
-                <a href="${res.sourceUrl}" class="wikipedia">${res.source} ›</a>
+                <div class="summary-text">
+                    ${res.snippet.replace(/\<\/?(pre|code).*?\/?\>/g, "").slice(0, 140)}... 
+                    <a href="${res.sourceUrl}" class="wikipedia">${res.source} ›</a>
+                </div>
             </div>
             ${infoboxHtml}
         `;

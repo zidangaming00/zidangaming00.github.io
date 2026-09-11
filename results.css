@@ -162,17 +162,38 @@
 .result-card--empty,
 .corrected-word { padding: 16px; }
 .corrected-word .spelling { color: var(--color-title); -webkit-tap-highlight-color: rgba(0,0,0,.10); }
+
 /* --------------------------------------------------------------------
-   Instant answer (Modern Google Style)
+   Instant answer (Mobile Web Result Style - Straight & Border Top/Bottom)
    -------------------------------------------------------------------- */
 
 .instant-answer {
-  border: 1px solid var(--color-border);
-  border-radius: 16px;
+  border-radius: 0;
+  border-top: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
+  border-left: none;
+  border-right: none;
   padding: 16px;
   margin-bottom: 8px;
   background: var(--color-white);
-  box-shadow: 0 1px 6px rgba(32,33,36,.1);
+  box-shadow: none;
+}
+
+.instant-answer .title {
+  font-size: 22px;
+  font-weight: 400;
+  color: var(--color-text-dark);
+  margin: 0 0 12px 0;
+  line-height: 1.2;
+}
+
+.instant-answer .logo {
+  width: 100%;
+  max-height: 260px;
+  object-fit: contain;
+  background: var(--color-bg-alt);
+  border-radius: 8px;
+  margin-bottom: 14px;
 }
 
 .instant-answer__section-title {
@@ -184,43 +205,33 @@
   letter-spacing: 0.5px;
 }
 
-.instant-answer .logo {
-  width: 100%;
-  max-height: 180px;
-  object-fit: cover;
-  border-radius: 12px;
-  margin: 8px 0 12px 0;
-  padding: 0 !important;
-}
-
-.instant-answer .title {
-  font-size: 22px;
-  font-weight: 400;
-  color: var(--color-text-dark);
-  margin: 4px 0 8px 0;
-  line-height: 1.2;
+.instant-answer .summary-box {
+  background: var(--color-bg-alt);
+  border-radius: 8px;
+  padding: 12px 14px;
+  margin-bottom: 14px;
 }
 
 .instant-answer .snippet {
   color: var(--color-text);
-  font-size: 15px;
+  font-size: 14px;
   line-height: 1.5;
+  margin-bottom: 6px;
 }
 
 .instant-answer .wikipedia {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
   color: var(--color-title);
   text-decoration: none;
-  margin-top: 8px;
 }
 
 .instant-answer .wikipedia:after {
   content: "›";
-  font-size: 16px;
+  font-size: 15px;
   font-weight: bold;
 }
 
@@ -228,14 +239,11 @@
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 8px;
-  margin-top: 14px;
-  padding-top: 14px;
-  border-top: 1px solid var(--color-border-alt);
 }
 
 .instant-answer .infobox-item {
   background: var(--color-bg-alt);
-  border-radius: 12px;
+  border-radius: 8px;
   padding: 10px 12px;
   display: flex;
   flex-direction: column;
@@ -245,18 +253,6 @@
 .instant-answer .infobox-item__label {
   font-size: 12px;
   color: var(--color-text-muted);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.instant-answer .infobox-item__label:after {
-  content: "";
-  width: 12px;
-  height: 12px;
-  background-image: url('data:image/svg+xml,<svg focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%2370757a"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg>');
-  background-size: contain;
-  background-repeat: no-repeat;
 }
 
 .instant-answer .infobox-item__value {
@@ -270,27 +266,34 @@
   text-overflow: ellipsis;
 }
 
+/* Khusus Tampilan Desktop (Sidebar) tetap dibikin gaya card melengkung */
 @media (min-width: 780px) {
-  .instant-answer { width: 310px; border-style: solid; border-radius: 16px; border-color: var(--color-border); margin-left: 20px; box-shadow: none; }
-  .results-list .instant-answer { display: none; } /* di desktop instant-answer pindah ke sidebar */
+  .instant-answer { 
+    width: 310px; 
+    border: 1px solid var(--color-border); 
+    border-radius: 16px; 
+    margin-left: 20px; 
+    box-shadow: none; 
+  }
+  .results-list .instant-answer { display: none; }
 }
 @media (min-width: 992px) {
   .instant-answer { width: 380px; }
 }
 
-/* Dark mode untuk Instant Answer modern */
+/* Dark mode */
 body.dark .instant-answer {
   background: #202125;
   border-color: #3c4043;
   box-shadow: none;
 }
+body.dark .instant-answer .summary-box,
 body.dark .instant-answer .infobox-item {
   background: #303135;
 }
-body.dark .instant-answer .infobox-item__label:after {
-  filter: invert(100%);
+body.dark .instant-answer .logo {
+  background: #191a1d;
 }
-
 
 /* --------------------------------------------------------------------
    Related search

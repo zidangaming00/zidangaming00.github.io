@@ -145,62 +145,59 @@ const API = {
 // 5. WIDGETS & INSTANT ANSWERS
 // ==========================================
 const Widgets = {
-    renderInstantCard: (res) => {
-    if (!res.snippet || res.snippet.length <= 100) return;
-    const container = document.createElement("div");
-    container.className = "instant-answer";
+        renderInstantCard: (res) => {
+        if (!res.snippet || res.snippet.length <= 100) return;
+        const container = document.createElement("div");
+        container.className = "instant-answer";
 
-    let imageHtml = '';
-    if (res.image) {
-        imageHtml = `<img src="${res.image}" class="logo" alt="${res.title}" ${res.type ? 'style="border:1px solid #999"' : ''}>`;
-    }
-
-    let infoboxHtml = '';
-    if (res.infobox && res.infobox.length > 0) {
-        const items = res.infobox.slice(0, 4).map(info => {
-            if (!info.value.trim()) return '';
-            return `
-                <div class="infobox-item">
-                    <div class="infobox-item__label">${info.label}</div>
-                    <div class="infobox-item__value">${info.value}</div>
-                </div>
-            `;
-        }).join("");
-        if (items) {
-            infoboxHtml = `<div class="infobox">${items}</div>`;
+        let imageHtml = '';
+        if (res.image) {
+            imageHtml = `<img src="${res.image}" class="logo" alt="${res.title}" ${res.type ? 'style="border:1px solid #999"' : ''}>`;
         }
-    }
 
-    container.innerHTML = `
-        <div class="instant-answer__section-title">Ringkasan</div>
-        ${imageHtml}
-        <div class="title">${res.title}</div>
-        <div class="about">
-            <div class="snippet">${res.snippet.replace(/\<\/?(pre|code).*?\/?\>/g, "").slice(0, 220)}...</div>
-            <a href="${res.sourceUrl}" class="wikipedia">${res.source}</a>
-        </div>
-        ${infoboxHtml}
-    `;
+        let infoboxHtml = '';
+        if (res.infobox && res.infobox.length > 0) {
+            const items = res.infobox.slice(0, 2).map(info => {
+                if (!info.value.trim()) return '';
+                return `
+                    <div class="infobox-item">
+                        <div class="infobox-item__label">${info.label}</div>
+                        <div class="infobox-item__value">${info.value}</div>
+                    </div>
+                `;
+            }).join("");
+            if (items) {
+                infoboxHtml = `<div class="infobox">${items}</div>`;
+            }
+        }
 
-    // Menggunakan kembali logika wrapper & urutan mobile milikmu
-    const wrapper = Config.windowWidth > 780 ? document.querySelector(".sidebar-panel") || (() => {
-        const side = document.createElement("div"); side.className = "sidebar-panel";
-        document.querySelector(".result-wrapper").appendChild(side);
-        return side;
-    })() : document.querySelectorAll(".result-card")[2];
+        container.innerHTML = `
+            <div class="title">${res.title}</div>
+            ${imageHtml}
+            <div class="instant-answer__section-title">Ringkasan</div>
+            <div class="summary-box">
+                <div class="snippet">${res.snippet.replace(/\<\/?(pre|code).*?\/?\>/g, "").slice(0, 220)}...</div>
+                <a href="${res.sourceUrl}" class="wikipedia">${res.source}</a>
+            </div>
+            ${infoboxHtml}
+        `;
 
-    if (Config.windowWidth > 780) {
-        wrapper.appendChild(container);
-    } else {
-        if (wrapper) {
-            Utils.insertAfter(wrapper, container);
+        const wrapper = Config.windowWidth > 780 ? document.querySelector(".sidebar-panel") || (() => {
+            const side = document.createElement("div"); side.className = "sidebar-panel";
+            document.querySelector(".result-wrapper").appendChild(side);
+            return side;
+        })() : document.querySelectorAll(".result-card")[2];
+
+        if (Config.windowWidth > 780) {
+            wrapper.appendChild(container);
         } else {
-            // Fallback jika result-card ke-2 tidak ada
-            document.querySelector(".main-result").appendChild(container);
+            if (wrapper) {
+                Utils.insertAfter(wrapper, container);
+            } else {
+                document.querySelector(".main-result").appendChild(container);
+            }
         }
-    }
-},
-
+    },
 
     renderWidgets: () => {
         const query = Config.q.toLowerCase();

@@ -567,9 +567,10 @@ const SuggestionsManager = {
     openMobileOverlay: (initialQuery) => {
         const mainInput = document.querySelector(".search-input");
         
-        // AMBIL NILAI: Prioritaskan teks dari mainInput jika ada isinya, 
-        // jika mainInput kosong (misal baru saja diklik silang/clear), gunakan initialQuery yang dikirimkan.
-        const savedQuery = (mainInput && mainInput.value.trim() !== "") ? mainInput.value : initialQuery;
+        // Simpan nilai asli dari input utama saat overlay pertama kali dibuka
+        // Ini memastikan jika user batal (back), nilai aslinya tidak hilang/berubah
+        const originalMainQuery = mainInput ? mainInput.value : "";
+        const activeQuery = originalMainQuery.trim() !== "" ? originalMainQuery : initialQuery;
 
         let overlay = document.querySelector(".sug-mobile-overlay");
         if (!overlay) {
@@ -595,9 +596,11 @@ const SuggestionsManager = {
             const clearBtn = overlay.querySelector("#sugClearBtn");
             const backBtn = overlay.querySelector("#sugBackBtn");
 
-            // Tombol Back: Mengembalikan teks terakhir ke input utama jika batal
+            // PERBAIKAN UTAMA: Tombol Back wajib mengembalikan input utama ke nilai ASLI sebelum overlay dibuka
             backBtn.addEventListener("click", () => {
-                if (mainInput) mainInput.value = mobInput.value;
+                if (mainInput) {
+                    mainInput.value = overlay.dataset.originalQuery || "";
+                }
                 SuggestionsManager.closeMobileOverlay();
             });
             
@@ -621,25 +624,29 @@ const SuggestionsManager = {
             });
         }
 
+        // Simpan nilai original ke atribut dataset overlay agar bisa diakses event listener back
+        overlay.dataset.originalQuery = originalMainQuery;
+
         overlay.classList.add("active");
         const mobInput = overlay.querySelector(".sug-mobile-input");
         const clearBtn = overlay.querySelector("#sugClearBtn");
 
-        // Masukkan teks yang aman (savedQuery) ke dalam input mobile
-        mobInput.value = savedQuery;
-        clearBtn.style.display = savedQuery ? "block" : "none";
+        // Masukkan teks ke input mobile
+        mobInput.value = activeQuery;
+        clearBtn.style.display = activeQuery ? "block" : "none";
         
         mobInput.focus();
         
-        // Posisikan kursor di akhir teks agar tidak kelap-kelip di depan
+        // Posisikan kursor di akhir teks
         setTimeout(() => {
             mobInput.setSelectionRange(mobInput.value.length, mobInput.value.length);
         }, 10);
 
-        if (savedQuery.trim()) {
-            SuggestionsManager.fetchAndRender(savedQuery.trim(), "#sugMobileList", true);
+        if (activeQuery.trim()) {
+            SuggestionsManager.fetchAndRender(activeQuery.trim(), "#sugMobileList", true);
         }
     },
+
 
     closeMobileOverlay: () => {
         const overlay = document.querySelector(".sug-mobile-overlay");

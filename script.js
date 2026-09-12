@@ -565,6 +565,10 @@ const SuggestionsManager = {
 
     // ---------------- MOBILE POPUP OVERLAY ----------------
     openMobileOverlay: (initialQuery) => {
+        const mainInput = document.querySelector(".search-input");
+        // Simpan nilai asli dari input utama sebelum overlay dibuka
+        const savedQuery = mainInput ? mainInput.value : initialQuery;
+
         let overlay = document.querySelector(".sug-mobile-overlay");
         if (!overlay) {
             overlay = document.createElement("div");
@@ -577,8 +581,8 @@ const SuggestionsManager = {
                         </svg>
                     </button>
                     <div class="sug-input-wrap">
-                        <input type="search" class="sug-mobile-input" value="${Utils.escapeHTML(initialQuery)}" placeholder="${getText("placeholder")}" autocomplete="off" autofocus>
-                        <button type="button" class="sug-clear-btn" id="sugClearBtn" style="display:${initialQuery ? 'block' : 'none'}">&times;</button>
+                        <input type="search" class="sug-mobile-input" placeholder="${getText("placeholder")}" autocomplete="off">
+                        <button type="button" class="sug-clear-btn" id="sugClearBtn" style="display:none">&times;</button>
                     </div>
                 </div>
                 <div class="sug-mobile-list" id="sugMobileList"></div>
@@ -589,8 +593,11 @@ const SuggestionsManager = {
             const clearBtn = overlay.querySelector("#sugClearBtn");
             const backBtn = overlay.querySelector("#sugBackBtn");
 
-            // Event listener overlay mobile
-            backBtn.addEventListener("click", () => SuggestionsManager.closeMobileOverlay());
+            // PERBAIKAN 2: Saat tombol back dikembalikan, pulihkan teks ke input utama seperti semula
+            backBtn.addEventListener("click", () => {
+                if (mainInput) mainInput.value = mobInput.value;
+                SuggestionsManager.closeMobileOverlay();
+            });
             
             clearBtn.addEventListener("click", () => {
                 mobInput.value = "";
@@ -614,10 +621,21 @@ const SuggestionsManager = {
 
         overlay.classList.add("active");
         const mobInput = overlay.querySelector(".sug-mobile-input");
-        mobInput.value = initialQuery;
+        const clearBtn = overlay.querySelector("#sugClearBtn");
+
+        // Masukkan teks dan sinkronkan tombol clear
+        mobInput.value = savedQuery;
+        clearBtn.style.display = savedQuery ? "block" : "none";
+        
         mobInput.focus();
-        if (initialQuery.trim()) {
-            SuggestionsManager.fetchAndRender(initialQuery.trim(), "#sugMobileList", true);
+        
+        // PERBAIKAN 1: Pindahkan posisi kursor ke paling akhir teks agar tidak di depan (kelap-kelip di awal)
+        setTimeout(() => {
+            mobInput.setSelectionRange(mobInput.value.length, mobInput.value.length);
+        }, 10);
+
+        if (savedQuery.trim()) {
+            SuggestionsManager.fetchAndRender(savedQuery.trim(), "#sugMobileList", true);
         }
     },
 

@@ -567,8 +567,7 @@ const SuggestionsManager = {
     openMobileOverlay: (initialQuery) => {
         const mainInput = document.querySelector(".search-input");
         
-        // Simpan nilai asli dari input utama saat overlay pertama kali dibuka
-        // Ini memastikan jika user batal (back), nilai aslinya tidak hilang/berubah
+        // 1. Kunci nilai asli input utama saat pertama kali overlay dibuka
         const originalMainQuery = mainInput ? mainInput.value : "";
         const activeQuery = originalMainQuery.trim() !== "" ? originalMainQuery : initialQuery;
 
@@ -596,7 +595,8 @@ const SuggestionsManager = {
             const clearBtn = overlay.querySelector("#sugClearBtn");
             const backBtn = overlay.querySelector("#sugBackBtn");
 
-            // PERBAIKAN UTAMA: Tombol Back wajib mengembalikan input utama ke nilai ASLI sebelum overlay dibuka
+            // 2. Tombol Back: Murni mengembalikan input utama ke nilai ASLI awal, 
+            // TIDAK PEDULI apa yang diketik atau dihapus di popup.
             backBtn.addEventListener("click", () => {
                 if (mainInput) {
                     mainInput.value = overlay.dataset.originalQuery || "";
@@ -614,30 +614,31 @@ const SuggestionsManager = {
             mobInput.addEventListener("input", (e) => {
                 const val = e.target.value;
                 clearBtn.style.display = val ? "block" : "none";
+                // CATATAN: mainInput Sengaja TIDAK DIUBAH DI SINI sama sekali!
                 SuggestionsManager.fetchAndRender(val.trim(), "#sugMobileList", true);
             });
 
             mobInput.addEventListener("keyup", (e) => {
                 if (e.key === "Enter" && mobInput.value.trim()) {
+                    // Konfirmasi enter: Sinkronkan mainInput sebelum pindah halaman
+                    if (mainInput) mainInput.value = mobInput.value.trim();
                     window.location.href = `/search?q=${encodeURIComponent(mobInput.value.trim()).replace(/%20/g, '+')}${searchLangParam}${searchParam}`;
                 }
             });
         }
 
-        // Simpan nilai original ke atribut dataset overlay agar bisa diakses event listener back
+        // Simpan nilai original terbaru ke dataset setiap kali overlay dipanggil
         overlay.dataset.originalQuery = originalMainQuery;
 
         overlay.classList.add("active");
         const mobInput = overlay.querySelector(".sug-mobile-input");
         const clearBtn = overlay.querySelector("#sugClearBtn");
 
-        // Masukkan teks ke input mobile
         mobInput.value = activeQuery;
         clearBtn.style.display = activeQuery ? "block" : "none";
         
         mobInput.focus();
         
-        // Posisikan kursor di akhir teks
         setTimeout(() => {
             mobInput.setSelectionRange(mobInput.value.length, mobInput.value.length);
         }, 10);
@@ -646,7 +647,6 @@ const SuggestionsManager = {
             SuggestionsManager.fetchAndRender(activeQuery.trim(), "#sugMobileList", true);
         }
     },
-
 
     closeMobileOverlay: () => {
         const overlay = document.querySelector(".sug-mobile-overlay");

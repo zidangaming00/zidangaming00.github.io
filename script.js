@@ -150,6 +150,15 @@ const Widgets = {
         const container = document.createElement("div");
         container.className = "instant-answer";
 
+        // Ambil keterangan/subtitle (Wikidata description)
+        let subtitle = "";
+        if (res.infobox && Array.isArray(res.infobox)) {
+            const descItem = res.infobox.find(item => item.label === "Wikidata description" || item.data_type === "wd_description");
+            if (descItem) {
+                subtitle = descItem.value;
+            }
+        }
+
         let imageHtml = '';
         if (res.image) {
             imageHtml = `<img src="${res.image}" class="logo" alt="${res.title}" ${res.type ? 'style="border:1px solid #999"' : ''}>`;
@@ -173,6 +182,7 @@ const Widgets = {
 
         container.innerHTML = `
             <div class="title">${res.title}</div>
+            ${subtitle ? `<div class="instant-answer__subtitle">${subtitle}</div>` : ''}
             ${imageHtml}
             <div class="summary-box">
                 <div class="instant-answer__section-title">Ringkasan</div>

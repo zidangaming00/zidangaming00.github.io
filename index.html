@@ -472,52 +472,60 @@
         .catch(() => closeSuggestions());
     }
 
-    searchForm.addEventListener('submit', (e) => {
-    const query = input.value.trim();
-     input.value = query; 
-  
-  // Ambil pengaturan dari cookie via cookie.js
-  const settings = getData();
+     searchForm.addEventListener('submit', (e) => {
+      // 1. SELALU cegah submit bawaan HTML agar halaman tidak berkedip (flicker)
+      e.preventDefault(); 
+      
+      // 2. Bersihkan spasi HANYA pada variabel di memori, tampilan di layar tetap utuh
+      const query = input.value.trim(); 
+      
+      // Jika input hanya berisi spasi kosong, jangan lakukan apa-apa
+      if (!query) return;
+      
+      // Ambil pengaturan dari cookie via cookie.js
+      const settings = typeof getData === 'function' ? getData() : {};
 
-  // 1. Pastikan fitur navigasi URL langsung (newurl) bernilai true
-  if (!settings.newurl) return;
+      // 3. Evaluasi apakah query merupakan URL / Domain valid jika fitur aktif
+      if (settings.newurl) {
+        function checkUrl(text) {
+          if (!text || text.includes(' ')) return null;
 
-  // 2. Evaluasi apakah query merupakan URL / Domain valid
-  function checkUrl(text) {
-    if (!text || text.includes(' ')) return null;
+          if (/^https?:\/\//i.test(text)) {
+            try {
+              new URL(text);
+              return text;
+            } catch {
+              return null;
+            }
+          }
 
-    if (/^https?:\/\//i.test(text)) {
-      try {
-        new URL(text);
-        return text;
-      } catch {
-        return null;
+          const isDomain = /^([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(\/.*)?$/i.test(text);
+          const isLocalOrIp = /^(localhost|(\d{1,3}\.){3}\d{1,3})(:\d+)?(\/.*)?$/i.test(text);
+
+          if (isDomain || isLocalOrIp) {
+            return `https://${text}`;
+          }
+
+          return null;
+        }
+
+        const targetUrl = checkUrl(query);
+
+        if (targetUrl) {
+          // Jika URL valid dan fitur newtab aktif, buka di tab baru
+          if (settings.newtab) {
+            window.open(targetUrl, '_blank', 'noopener,noreferrer');
+          } else {
+            // Jika tidak, arahkan di tab yang sama
+            window.location.href = targetUrl;
+          }
+          return; // Hentikan eksekusi di sini agar tidak lanjut ke pencarian biasa
+        }
       }
-    }
 
-    const isDomain = /^([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(\/.*)?$/i.test(text);
-    const isLocalOrIp = /^(localhost|(\d{1,3}\.){3}\d{1,3})(:\d+)?(\/.*)?$/i.test(text);
-
-    if (isDomain || isLocalOrIp) {
-      return `https://${text}`;
-    }
-
-    return null;
-  }
-
-  const targetUrl = checkUrl(query);
-
-  if (targetUrl) {
-    e.preventDefault();
-
-    // Mengakomodasi opsi `newtab` jika diaktifkan dari cookie
-    if (settings.newtab) {
-      window.open(targetUrl, '_blank', 'noopener,noreferrer');
-    } else {
-      window.location.href = targetUrl;
-    }
-  }
-});
+      // 4. Jika bukan URL atau fitur newurl mati, redirect ke halaman search biasa
+      window.location.href = '/search?q=' + encodeURIComponent(query).replace(/%20/g, '+');
+    });
 
     function displaySuggestions(items) {
       suggestBox.innerHTML = '';

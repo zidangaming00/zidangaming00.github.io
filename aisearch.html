@@ -36,10 +36,6 @@
             border-radius: 24px;
             outline: none;
             box-shadow: 0 1px 6px rgba(32,33,36,.28);
-            transition: box-shadow 0.2s;
-        }
-        input[type="text"]:focus {
-            box-shadow: 0 1px 8px rgba(32,33,36,.4);
         }
         button {
             padding: 0 24px;
@@ -50,10 +46,6 @@
             border-radius: 24px;
             cursor: pointer;
             font-weight: bold;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
-        }
-        button:hover {
-            background-color: #1557b0;
         }
         #result-card {
             background: white;
@@ -87,30 +79,19 @@
     <div id="result-card">Hasil pencarian atau jawaban AI akan muncul di sini...</div>
 
     <script>
-        // Array API Key Groq kamu (bisa ditambahin kunci lain di dalam kurung siku jika ada)
         const groqKeys = [
             "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"
         ];
         let currentKeyIndex = 0;
 
-        // Algoritma Pendeteksi Pertanyaan (Supaya gak boros kuota untuk kata acak)
         function apakahIniPertanyaan(teks) {
             teks = teks.trim().toLowerCase();
-            
             if (teks.endsWith("?")) return true;
             if (teks.length < 5) return false;
 
-            const kataTanya = [
-                "apa", "siapa", "mengapa", "kenapa", "bagaimana", 
-                "kapan", "di mana", "dimana", "ke mana", "kemana", 
-                "jelaskan", "sebutkan", "resep", "cara", "siapakah",
-                "who", "what", "where", "when", "why", "how"
-            ];
-
+            const kataTanya = ["apa", "siapa", "mengapa", "kenapa", "bagaimana", "kapan", "di mana", "dimana", "jelaskan", "sebutkan", "resep", "cara"];
             for (let kata of kataTanya) {
-                if (teks.startsWith(kata + " ") || teks.includes(" " + kata + " ")) {
-                    return true;
-                }
+                if (teks.startsWith(kata + " ") || teks.includes(" " + kata + " ")) return true;
             }
             return false;
         }
@@ -124,23 +105,22 @@
                 return;
             }
 
-            // Validasi: Cek apakah input layak dilempar ke AI
             if (!apakahIniPertanyaan(inputVal)) {
-                resultCard.innerHTML = `<span class="error-msg">❌ Tidak memenuhi syarat AI! Masukkan kalimat pertanyaan yang valid (gunakan kata tanya atau tanda tanya '?'), bukan sekadar kata acak.</span>`;
+                resultCard.innerHTML = `<span class="error-msg">❌ Bukan pertanyaan valid atau terlalu pendek! Gunakan kata tanya atau tanda '?'.</span>`;
                 return;
             }
 
-            resultCard.innerHTML = `<span class="loading-msg">⏳ Deevv AI sedang merangkum jawaban...</span>`;
+            resultCard.innerHTML = `<span class="loading-msg">⏳ Deevv AI sedang memproses...</span>`;
 
             try {
                 const jawaban = await fetchGroqAI(inputVal);
                 resultCard.innerHTML = jawaban;
             } catch (error) {
-                resultCard.innerHTML = `<span class="error-msg">⚠️ Gagal memuat data: ${error.message}</span>`;
+                // Di sini error aslinya (beserta status HTTP-nya) bakal ditampilkan blak-blakan ke layar
+                resultCard.innerHTML = `<span class="error-msg">⚠️ Error Asli dari Server: ${error.message}</span>`;
             }
         }
 
-        // Fungsi fetch dengan sistem rotasi Array API Key otomatis
         async function fetchGroqAI(promptUser) {
             const apiKey = groqKeys[currentKeyIndex];
             const url = "https://api.groq.com/openai/v1/chat/completions";
@@ -148,56 +128,32 @@
             const payload = {
                 model: "llama-3.1-8b-instant",
                 messages: [
-                    {
-                        role: "system",
-                        content: "Kamu adalah AI di dalam mesin pencari Deevv. Jawab pertanyaan pengguna dengan ringkas, akurat, informatif, dan gunakan format rapi."
-                    },
-                    {
-                        role: "user",
-                        content: promptUser
-                    }
-                ],
-                temperature: 0.7
+                    { role: "system", content: "Jawab dengan ringkas dan to the point." },
+                    { role: "user", content: promptUser }
+                ]
             };
 
-            try {
-                let response = await fetch(url, {
-                    method: "POST",
-                    headers: {
-                        "Authorization": `Bearer ${apiKey}`,
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify(payload)
-                });
+            let response = await fetch(url, {
+                method: "POST",
+                headers: {
+                    "Authorization": `Bearer ${apiKey}`,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(payload)
+            });
 
-                // Jika kunci habis/kena rate limit (status 429) atau error server
-                if (!response.ok) {
-                    throw new Error(`HTTP Error Status: ${response.status}`);
-                }
-
-                const data = await response.json();
-                return data.choices[0].message.content;
-
-            } catch (err) {
-                console.warn(`Key indeks ke-${currentKeyIndex} bermasalah. Mencoba kunci cadangan...`);
-                
-                // Pindah ke key berikutnya dalam array
-                currentKeyIndex = (currentKeyIndex + 1) % groqKeys.length;
-                
-                // Jika sudah berputar habis dan kembali ke 0 tapi tetap gagal
-                if (currentKeyIndex === 0) {
-                    throw new Error("Semua API key dalam array habis kuotanya atau terjadi gangguan jaringan.");
-                }
-
-                // Coba ulang pemanggilan pakai key baru secara rekursif
-                return await fetchGroqAI(promptUser);
+            // Tangkap isi teks error dari server Groq kalau statusnya bukan 200 OK
+            if (!response.ok) {
+                let errorBody = await response.text();
+                throw new Error(`Status HTTP ${response.status} - Detail: ${errorBody}`);
             }
+
+            const data = await response.json();
+            return data.choices[0].message.content;
         }
 
         function handleKeyPress(event) {
-            if (event.key === "Enter") {
-                jalankanPencarian();
-            }
+            if (event.key === "Enter") jalankanPencarian();
         }
     </script>
 </body>

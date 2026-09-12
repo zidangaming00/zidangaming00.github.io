@@ -566,8 +566,10 @@ const SuggestionsManager = {
     // ---------------- MOBILE POPUP OVERLAY ----------------
     openMobileOverlay: (initialQuery) => {
         const mainInput = document.querySelector(".search-input");
-        // Simpan nilai asli dari input utama sebelum overlay dibuka
-        const savedQuery = mainInput ? mainInput.value : initialQuery;
+        
+        // AMBIL NILAI: Prioritaskan teks dari mainInput jika ada isinya, 
+        // jika mainInput kosong (misal baru saja diklik silang/clear), gunakan initialQuery yang dikirimkan.
+        const savedQuery = (mainInput && mainInput.value.trim() !== "") ? mainInput.value : initialQuery;
 
         let overlay = document.querySelector(".sug-mobile-overlay");
         if (!overlay) {
@@ -593,7 +595,7 @@ const SuggestionsManager = {
             const clearBtn = overlay.querySelector("#sugClearBtn");
             const backBtn = overlay.querySelector("#sugBackBtn");
 
-            // PERBAIKAN 2: Saat tombol back dikembalikan, pulihkan teks ke input utama seperti semula
+            // Tombol Back: Mengembalikan teks terakhir ke input utama jika batal
             backBtn.addEventListener("click", () => {
                 if (mainInput) mainInput.value = mobInput.value;
                 SuggestionsManager.closeMobileOverlay();
@@ -623,13 +625,13 @@ const SuggestionsManager = {
         const mobInput = overlay.querySelector(".sug-mobile-input");
         const clearBtn = overlay.querySelector("#sugClearBtn");
 
-        // Masukkan teks dan sinkronkan tombol clear
+        // Masukkan teks yang aman (savedQuery) ke dalam input mobile
         mobInput.value = savedQuery;
         clearBtn.style.display = savedQuery ? "block" : "none";
         
         mobInput.focus();
         
-        // PERBAIKAN 1: Pindahkan posisi kursor ke paling akhir teks agar tidak di depan (kelap-kelip di awal)
+        // Posisikan kursor di akhir teks agar tidak kelap-kelip di depan
         setTimeout(() => {
             mobInput.setSelectionRange(mobInput.value.length, mobInput.value.length);
         }, 10);

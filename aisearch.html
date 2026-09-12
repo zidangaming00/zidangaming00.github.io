@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deevv - Smart AI Search</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: #f4f6f9;
+            color: #333;
+            max-width: 650px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #1a73e8;
+            margin-bottom: 5px;
+        }
+        p.subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+        }
+        .search-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+        input[type="text"] {
+            flex: 1;
+            padding: 14px 18px;
+            font-size: 16px;
+            border: 1px solid #dfe1e5;
+            border-radius: 24px;
+            outline: none;
+            box-shadow: 0 1px 6px rgba(32,33,36,.28);
+            transition: box-shadow 0.2s;
+        }
+        input[type="text"]:focus {
+            box-shadow: 0 1px 8px rgba(32,33,36,.4);
+        }
+        button {
+            padding: 0 24px;
+            font-size: 16px;
+            background-color: #1a73e8;
+            color: white;
+            border: none;
+            border-radius: 24px;
+            cursor: pointer;
+            font-weight: bold;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+        button:hover {
+            background-color: #1557b0;
+        }
+        #result-card {
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            min-height: 100px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+        }
+        .error-msg {
+            color: #d93025;
+            font-weight: 600;
+        }
+        .loading-msg {
+            color: #1a73e8;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Deevv</h1>
+    <p class="subtitle">Eksperimen Smart Search Berbasis AI</p>
+
+    <div class="search-container">
+        <input type="text" id="queryInput" placeholder="Cth: Apa itu game Minecraft?" onkeypress="handleKeyPress(event)">
+        <button onclick="jalankanPencarian()">Cari</button>
+    </div>
+
+    <div id="result-card">Hasil pencarian atau jawaban AI akan muncul di sini...</div>
+
+    <script>
+        // Array API Key Groq kamu (bisa ditambahin kunci lain di dalam kurung siku jika ada)
+        const groqKeys = [
+            "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"
+        ];
+        let currentKeyIndex = 0;
+
+        // Algoritma Pendeteksi Pertanyaan (Supaya gak boros kuota untuk kata acak)
+        function apakahIniPertanyaan(teks) {
+            teks = teks.trim().toLowerCase();
+            
+            if (teks.endsWith("?")) return true;
+            if (teks.length < 5) return false;
+
+            const kataTanya = [
+                "apa", "siapa", "mengapa", "kenapa", "bagaimana", 
+                "kapan", "di mana", "dimana", "ke mana", "kemana", 
+                "jelaskan", "sebutkan", "resep", "cara", "siapakah",
+                "who", "what", "where", "when", "why", "how"
+            ];
+
+            for (let kata of kataTanya) {
+                if (teks.startsWith(kata + " ") || teks.includes(" " + kata + " ")) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        async function jalankanPencarian() {
+            const inputVal = document.getElementById("queryInput").value;
+            const resultCard = document.getElementById("result-card");
+
+            if (!inputVal.trim()) {
+                resultCard.innerHTML = `<span class="error-msg">⚠️ Kolom pencarian tidak boleh kosong!</span>`;
+                return;
+            }
+
+            // Validasi: Cek apakah input layak dilempar ke AI
+            if (!apakahIniPertanyaan(inputVal)) {
+                resultCard.innerHTML = `<span class="error-msg">❌ Tidak memenuhi syarat AI! Masukkan kalimat pertanyaan yang valid (gunakan kata tanya atau tanda tanya '?'), bukan sekadar kata acak.</span>`;
+                return;
+            }
+
+            resultCard.innerHTML = `<span class="loading-msg">⏳ Deevv AI sedang merangkum jawaban...</span>`;
+
+            try {
+                const jawaban = await fetchGroqAI(inputVal);
+                resultCard.innerHTML = jawaban;
+            } catch (error) {
+                resultCard.innerHTML = `<span class="error-msg">⚠️ Gagal memuat data: ${error.message}</span>`;
+            }
+        }
+
+        // Fungsi fetch dengan sistem rotasi Array API Key otomatis
+        async function fetchGroqAI(promptUser) {
+            const apiKey = groqKeys[currentKeyIndex];
+            const url = "https://api.groq.com/openai/v1/chat/completions";
+
+            const payload = {
+                model: "llama-3.1-8b-instant",
+                messages: [
+                    {
+                        role: "system",
+                        content: "Kamu adalah AI di dalam mesin pencari Deevv. Jawab pertanyaan pengguna dengan ringkas, akurat, informatif, dan gunakan format rapi."
+                    },
+                    {
+                        role: "user",
+                        content: promptUser
+                    }
+                ],
+                temperature: 0.7
+            };
+
+            try {
+                let response = await fetch(url, {
+                    method: "POST",
+                    headers: {
+                        "Authorization": `Bearer ${apiKey}`,
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                // Jika kunci habis/kena rate limit (status 429) atau error server
+                if (!response.ok) {
+                    throw new Error(`HTTP Error Status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                return data.choices[0].message.content;
+
+            } catch (err) {
+                console.warn(`Key indeks ke-${currentKeyIndex} bermasalah. Mencoba kunci cadangan...`);
+                
+                // Pindah ke key berikutnya dalam array
+                currentKeyIndex = (currentKeyIndex + 1) % groqKeys.length;
+                
+                // Jika sudah berputar habis dan kembali ke 0 tapi tetap gagal
+                if (currentKeyIndex === 0) {
+                    throw new Error("Semua API key dalam array habis kuotanya atau terjadi gangguan jaringan.");
+                }
+
+                // Coba ulang pemanggilan pakai key baru secara rekursif
+                return await fetchGroqAI(promptUser);
+            }
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === "Enter") {
+                jalankanPencarian();
+            }
+        }
+    </script>
+</body>
+</html>

@@ -473,7 +473,8 @@
     }
 
     searchForm.addEventListener('submit', (e) => {
-  const query = input.value.trim();
+    const query = input.value.trim();
+     input.value = query; 
   
   // Ambil pengaturan dari cookie via cookie.js
   const settings = getData();

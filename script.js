@@ -451,11 +451,15 @@ const UI = {
 
         if (clearBtn) {
             clearBtn.addEventListener('click', () => { 
+                // TAMBAHAN: Simpan nilai sebelum dihapus sebagai backup untuk tombol back popup
+                searchInput.setAttribute('data-backup-value', searchInput.value);
+                
                 searchInput.value = ""; 
                 searchInput.focus(); 
                 clearBtn.style.display = "none"; 
             });
         }
+
 
         searchInput.addEventListener('keyup', (e) => { 
             if (e.key === "Enter" && toggleBtn) toggleBtn.click(); 
@@ -567,9 +571,17 @@ const SuggestionsManager = {
     openMobileOverlay: (initialQuery) => {
         const mainInput = document.querySelector(".search-input");
         
-        // 1. Kunci nilai asli input utama saat pertama kali overlay dibuka
-        const originalMainQuery = mainInput ? mainInput.value : "";
-        const activeQuery = originalMainQuery.trim() !== "" ? originalMainQuery : initialQuery;
+        // 1. Kunci nilai asli input utama. Jika tombol X utama baru saja ditekan, ambil dari backup.
+        let originalMainQuery = "";
+        if (mainInput) {
+            originalMainQuery = mainInput.hasAttribute('data-backup-value') 
+                ? mainInput.getAttribute('data-backup-value') 
+                : mainInput.value;
+            mainInput.removeAttribute('data-backup-value'); // Hapus backup setelah dibaca
+        }
+
+        // Tentukan isi awal di dalam popup (kosong jika X ditekan, atau sesuai isi input)
+        const activeQuery = mainInput && mainInput.value.trim() !== "" ? mainInput.value : (initialQuery || "");
 
         let overlay = document.querySelector(".sug-mobile-overlay");
         if (!overlay) {
@@ -600,6 +612,12 @@ const SuggestionsManager = {
             backBtn.addEventListener("click", () => {
                 if (mainInput) {
                     mainInput.value = overlay.dataset.originalQuery || "";
+                    
+                    // TAMBAHAN: Munculkan kembali tombol X utama jika nilainya tidak kosong
+                    const mainClearBtn = document.querySelector(".cleartext");
+                    if (mainClearBtn) {
+                        mainClearBtn.style.display = mainInput.value ? "block" : "none";
+                    }
                 }
                 SuggestionsManager.closeMobileOverlay();
             });

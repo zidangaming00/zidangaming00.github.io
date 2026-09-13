@@ -140,7 +140,6 @@ const API = {
     }
 };
 
-
 // ==========================================
 // 5. WIDGETS & INSTANT ANSWERS
 // ==========================================
@@ -150,7 +149,6 @@ const Widgets = {
         const container = document.createElement("div");
         container.className = "instant-answer";
 
-        // Ambil keterangan/subtitle (Wikidata description)
         let subtitle = "";
         if (res.infobox && Array.isArray(res.infobox)) {
             const descItem = res.infobox.find(item => item.label === "Wikidata description" || item.data_type === "wd_description");
@@ -220,6 +218,8 @@ const Widgets = {
         const isDate = /tanggal|date/.test(query) && query.length < 15 && query.split(" ").length < 4;
         const isCalc = (/kalkulator|calculator/.test(query) && query.split(" ").length <= 2) || (/calculator\s+online|kalkulator\s+online/.test(query) && query.split(" ").length <= 3);
         const isTranslate = /translate|terjemah|terjemahan/.test(query);
+        const isQuestion = /^(apa|siapa|kapan|dimana|di mana|kemana|ke mana|mengapa|kenapa|bagaimana|berapa|how|what|why|who|when|where)\b/i.test(query) || /\?$/.test(query);
+
         const d = new Date();
 
         if (isTime) {
@@ -255,62 +255,184 @@ const Widgets = {
                 <div class="text-input"><textarea spellcheck="false" class="from-text" placeholder="Enter text"></textarea><textarea spellcheck="false" readonly disabled class="to-text" placeholder="Translation"></textarea></div></div></div>
             `);
             Widgets.initTranslator();
+        } 
+        else if (isQuestion) {
+            // ==========================================
+            // RENDER WIDGET AI (MENGGUNAKAN GROQ API)
+            // ==========================================
+            const aiWidgetHTML = `
+              <div class="result-card result-card--flat ai-widget-container" style="padding: 16px; border: 1px solid var(--color-border); border-radius: 16px; margin: 0 0 16px 0;">
+                <div style="display: flex; align-items: center; margin-bottom: 12px;">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="#a159ff" style="margin-right: 8px;">
+                    <path d="M19 3l-1 2.5L15.5 6.5 18 7.5 19 10l1-2.5L22.5 6.5 20 5.5zM10.5 15.5L8 22l-2.5-6.5L-1 13l6.5-2.5L8 4l2.5 6.5L17 13l-6.5 2.5z"/>
+                  </svg>
+                  <div style="font-size: 18px; font-weight: 500; color: var(--color-title);">Ringkasan AI</div>
+                  <span class="info-label" style="border-radius: 12px; padding: 2px 8px; font-size: 11px; margin-left: 10px; background: transparent;">Beta</span>
+                </div>
+                <div class="bone-container" id="ai-overview-loading">
+                    <div class="bone-line" style="height: 14px; border-radius: 4px; background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%); background-size: 400px 100%; animation: shimmer 1.4s infinite linear; margin-bottom: 8px;"></div>
+                    <div class="bone-line medium" style="height: 14px; width: 80%; border-radius: 4px; background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%); background-size: 400px 100%; animation: shimmer 1.4s infinite linear;"></div>
+                </div>
+                <div class="snippet" id="ai-overview-text" style="font-size: 14px; line-height: 1.6;"></div>
+              </div>
+            `;
+            
+            mainResult.insertAdjacentHTML('afterbegin', aiWidgetHTML);
+            this.populateAIOverview(Config.q);
         }
     },
 
-checkVideoWidget: async () => {
-    const slot = document.getElementById("dynamic-video-widget-slot");
-    if (!slot) return;
-    try {
-        const data = await API.fetchVideo(Config.q, 4);
-        if (!data.items || !data.items.length) {
-            slot.remove();
-            return;
+    populateAIOverview: async function(promptUser) {
+        const groqKeys = [
+            "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"
+        ];
+        const apiKey = groqKeys[0];
+        const url = "https://api.groq.com/openai/v1/chat/completions";
+
+        const payload = {
+            model: "openai/gpt-oss-20b",
+            messages: [
+                { 
+                    role: "system", 
+                    content: `Kamu adalah AI Search Overview. Jangan pernah gunakan sapaan. 
+WAJIB berikan jawaban dengan format persis seperti ini (gunakan '---' sebagai pemisah):
+[Paragraf definisi singkat tentang topik, maksimal 3 kalimat]
+---
+[Ketik SATU judul sub-topik yang paling relevan dengan pertanyaan, misal: 'Karakteristik [Topik]' atau 'Penyebab [Topik]']
+---
+[Berikan 3-5 poin penting (bullet). Awali setiap baris dengan '- **[Kata Kunci]:**' diikuti penjelasannya]` 
+                },
+                { role: "user", content: promptUser }
+            ],
+            temperature: 0.3
+        };
+
+        try {
+            const response = await fetch(url, {
+                method: "POST",
+                headers: { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            });
+
+            if (!response.ok) {
+                throw new Error(`Gagal memuat AI. HTTP: ${response.status}`);
+            }
+
+            const data = await response.json();
+            let aiText = data.choices[0].message.content.trim();
+            
+            // Render hasil parsing AI ke dalam kontainer widget
+            const loadingEl = document.getElementById("ai-overview-loading");
+            if (loadingEl) loadingEl.remove();
+
+            const aiBox = document.getElementById("ai-overview-text");
+            if (aiBox) {
+                aiBox.innerHTML = Widgets.parserFormatAI(aiText);
+            }
+        } catch (error) {
+            const loadingEl = document.getElementById("ai-overview-loading");
+            if (loadingEl) loadingEl.remove();
+            
+            const aiBox = document.getElementById("ai-overview-text");
+            if (aiBox) {
+                aiBox.innerHTML = `<span style="color: #d93025; font-weight: 500;">⚠️ Error memuat Ringkasan AI: ${error.message}</span>`;
+            }
+        }
+    },
+
+    parserFormatAI: function(teks) {
+        let formattedText = teks.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        const parts = formattedText.split('---').map(p => p.trim());
+        
+        let summary = "";
+        let subTitle = "Informasi Tambahan";
+        let listItems = [];
+
+        if (parts.length >= 3) {
+            summary = parts[0];
+            subTitle = parts[1].replace(/\*\*/g, '');
+            let rawList = parts.slice(2).join("\n"); 
+            listItems = rawList.split('\n').filter(line => line.trim().match(/^[-*]/)).map(line => line.replace(/^[-*]\s*/, '').trim());
+        } else {
+            summary = formattedText; 
         }
 
-        let videonya = "";
-        let limit = Math.min(data.items.length, 4);
-        for (let i = 0; i < limit; i++) {
-            let item = data.items[i];
-            let videoId = item.id.videoId || item.id;
-            let title = Utils.escapeHTML(item.snippet.title);
-            let thumb = item.snippet.thumbnails.medium.url;
-            let channel = Utils.escapeHTML(item.snippet.channelTitle);
-            let dateStr = Utils.dateConversion(item.snippet.publishTime);
+        let html = `<div class="summary-text" style="margin-bottom: 12px;">${summary}</div>`;
 
-            videonya += `
-                <div class="video-widget-item">
-                    <a href="https://youtube.com/watch?v=${videoId}">
-                        <div class="video-widget-item__row">
-                            <div class="thumbnail">
-                                <img src="${thumb}">
-                                <div class="video-widget-item__play">
-                                    <span class="play-icon">
-                                        <svg focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                                            <circle fill="#fff" cx="12" cy="12" r="6.2"/>
-                                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5"></path>
-                                        </svg>
-                                    </span>
+        if (listItems.length > 0) {
+            html += `<div style="font-size: 16px; font-weight: 600; color: var(--color-title, #001d35); margin-bottom: 8px;">${subTitle}</div>`;
+            html += `<ul style="list-style-type: disc; padding-left: 20px; margin: 0; font-size: 14px; line-height: 1.6;">`;
+            
+            listItems.forEach((item, index) => {
+                let hiddenClass = index > 0 ? "display: none;" : "";
+                let className = index > 0 ? "hidden-item" : "";
+                html += `<li class="${className}" style="margin-bottom: 6px; ${hiddenClass}">${item}</li>`;
+            });
+            html += `</ul>`;
+
+            if (listItems.length > 1) {
+                html += `
+                    <button class="btn-show-more" onclick="const parent = this.parentElement; parent.querySelectorAll('.hidden-item').forEach(el => el.style.display = el.style.display === 'none' ? 'list-item' : 'none'); this.classList.toggle('expanded'); this.innerHTML = this.classList.contains('expanded') ? 'Tampilkan lebih sedikit' : 'Tampilkan lainnya';" style="display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; margin-top: 12px; padding: 8px 0; font-size: 13px; font-weight: 500; color: var(--color-title, #001d35); background: transparent; border: 1px solid var(--color-border, #d2d2d7); border-radius: 16px; cursor: pointer;">
+                        Tampilkan lainnya
+                    </button>
+                `;
+            }
+        }
+        return html;
+    },
+
+    checkVideoWidget: async () => {
+        const slot = document.getElementById("dynamic-video-widget-slot");
+        if (!slot) return;
+        try {
+            const data = await API.fetchVideo(Config.q, 4);
+            if (!data.items || !data.items.length) {
+                slot.remove();
+                return;
+            }
+
+            let videonya = "";
+            let limit = Math.min(data.items.length, 4);
+            for (let i = 0; i < limit; i++) {
+                let item = data.items[i];
+                let videoId = item.id.videoId || item.id;
+                let title = Utils.escapeHTML(item.snippet.title);
+                let thumb = item.snippet.thumbnails.medium.url;
+                let channel = Utils.escapeHTML(item.snippet.channelTitle);
+                let dateStr = Utils.dateConversion(item.snippet.publishTime);
+
+                videonya += `
+                    <div class="video-widget-item">
+                        <a href="https://youtube.com/watch?v=${videoId}">
+                            <div class="video-widget-item__row">
+                                <div class="thumbnail">
+                                    <img src="${thumb}">
+                                    <div class="video-widget-item__play">
+                                        <span class="play-icon">
+                                            <svg focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                                                <circle fill="#fff" cx="12" cy="12" r="6.2"/>
+                                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5"></path>
+                                            </svg>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="video-widget-item__text">
+                                    <div class="video-widget-item__title">${title}</div>
+                                    <div class="video-widget-item__meta">YouTube<span class="dot"></span><div class="video-widget-item__channel">${channel}</div></div>
+                                    <div class="video-widget-item__date">${dateStr}</div>
                                 </div>
                             </div>
-                            <div class="video-widget-item__text">
-                                <div class="video-widget-item__title">${title}</div>
-                                <div class="video-widget-item__meta">YouTube<span class="dot"></span><div class="video-widget-item__channel">${channel}</div></div>
-                                <div class="video-widget-item__date">${dateStr}</div>
-                            </div>
-                        </div>
-                    </a>
-                </div>`;
+                        </a>
+                    </div>`;
+            }
+
+            slot.className = "result-card video-widget result-card--flat";
+            slot.innerHTML = `<div class="title video-widget__title">${getText("vidTitle")}</div><div class="video-widget__list">${videonya}</div>`;
+        } catch (err) {
+            slot.remove();
+            console.log("Gagal memuat widget video:", err);
         }
-
-        slot.className = "result-card video-widget result-card--flat";
-        slot.innerHTML = `<div class="title video-widget__title">${getText("vidTitle")}</div><div class="video-widget__list">${videonya}</div>`;
-    } catch (err) {
-        slot.remove();
-        console.log("Gagal memuat widget video:", err);
-    }
-},
-
+    },
 
     initCalculator: () => {
         const calculatorBox = document.querySelector(".calculator");
@@ -338,14 +460,13 @@ checkVideoWidget: async () => {
     },
 
     initTranslator: () => {
-        // Daftar negara disingkat untuk keterbacaan, tambahkan sesuai aslinya jika perlu
         const countries = { en: "English", id: "Indonesian", es: "Spanish", fr: "French", de: "German", ja: "Japanese", ko: "Korean", zh: "Chinese" }; 
         const container = document.querySelector(".trnsl");
         if (!container) return;
 
         const fromText = container.querySelector(".from-text"), toText = container.querySelector(".to-text");
         const exchangeIcon = container.querySelector(".exchange"), selects = container.querySelectorAll("select");
-        let isTranslating = false, timer;
+        let timer;
 
         selects.forEach((sel, i) => {
             for (let code in countries) {
@@ -383,7 +504,6 @@ checkVideoWidget: async () => {
         }
     }
 };
-
 
 // ==========================================
 // 6. UI BUILDER & LOGIC

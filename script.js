@@ -338,12 +338,13 @@ const Widgets = {
             .filter(line => line.trim().match(/^[-*]/))
             .map(line => line.replace(/^[-*]\s*/, '').trim());
 
+        // Ganti class 'snippet summary-text' menjadi 'ai-summary-text' agar tidak kena line-clamp 3 baris
         let html = `
             <div class="ai-header">
                 <svg viewBox="0 0 24 24"><path d="M19 9l1.25-2.75L23 5l-2.75-1.25L19 1l-1.25 2.75L15 5l2.75 1.25L19 9zm-7.5.5L9 4 6.5 9.5 1 12l5.5 2.5L9 20l2.5-5.5L17 12l-5.5-2.5zM19 15l-1.25 2.75L15 19l2.75 1.25L19 23l1.25-2.75L23 19l-2.75-1.25L19 15z"/></svg>
                 <span>${headerTitle}</span>
             </div>
-            <div class="snippet summary-text">${summary}</div>
+            <div class="ai-summary-text">${summary}</div>
         `;
 
         if (listItems.length > 0) {
@@ -357,9 +358,8 @@ const Widgets = {
             html += `</ul>`;
         }
 
-        // Render elemen kesimpulan jika ada
         if (conclusion) {
-            html += `<div class="snippet summary-text" style="margin-top: 12px; padding-top: 8px;">${conclusion}</div>`;
+            html += `<div class="ai-summary-text" style="margin-top: 12px; padding-top: 8px;">${conclusion}</div>`;
         }
 
         if (listItems.length > 1) {
@@ -374,7 +374,6 @@ const Widgets = {
         return html;
     },
 
-
     toggleAIList: (btn) => {
         const parent = btn.closest('.ai-overview-card');
         if (!parent) return;
@@ -383,7 +382,13 @@ const Widgets = {
         
         hiddenItems.forEach((item, index) => {
             if (index > 0) {
-                item.style.display = isExpanded ? 'list-item' : 'none';
+                if (isExpanded) {
+                    item.classList.remove('hidden-item');
+                    item.style.display = 'list-item';
+                } else {
+                    item.classList.add('hidden-item');
+                    item.style.display = 'none';
+                }
             }
         });
 

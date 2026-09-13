@@ -236,7 +236,7 @@ const Widgets = {
         }
     },
 
-    renderWidgets: () => {
+    renderWidgets: (res) => {
         const query = Config.q.toLowerCase();
         const mainResult = document.querySelector(".main-result .results-list");
         if (!mainResult) return;
@@ -287,7 +287,7 @@ const Widgets = {
     },
 
     // --- WIDGET AI OVERVIEW ---
-    checkAIOverview: async () => {
+    checkAIOverview: async (res) => {
         if (res?.spelling) return;
         const query = Config.q.trim();
         const mainResult = document.querySelector(".main-result .results-list");

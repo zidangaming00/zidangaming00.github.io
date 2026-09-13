@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cuaca</title>
+<style>
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+        background-color: #ffffff;
+        color: #1f1f1f;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-height: 100vh;
+        padding: 16px 12px 40px;
+        transition: background 0.6s ease;
+    }
+
+    .search-container {
+        width: 100%;
+        max-width: 460px;
+        margin-bottom: 16px;
+    }
+
+    .search-box {
+        display: flex;
+        align-items: center;
+        background: #f1f3f4;
+        border-radius: 24px;
+        padding: 8px 16px;
+    }
+
+    .search-input {
+        flex: 1;
+        border: none;
+        outline: none;
+        font-size: 15px;
+        background: transparent;
+        color: #1f1f1f;
+    }
+
+    .search-btn {
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: #5f6368;
+        display: flex;
+    }
+
+    .weather-app {
+        width: 100%;
+        max-width: 460px;
+    }
+
+    .location-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-size: 14px;
+        margin-bottom: 6px;
+        padding: 0 4px;
+    }
+
+    .location-left {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        color: #3c4043;
+        font-size: 14px;
+        font-weight: 500;
+    }
+
+    .blue-dot {
+        width: 8px;
+        height: 8px;
+        background-color: #1a73e8;
+        border-radius: 50%;
+        flex-shrink: 0;
+    }
+
+    .change-area {
+        color: #1a73e8;
+        font-size: 13px;
+        cursor: pointer;
+    }
+
+    .main-title {
+        font-size: 26px;
+        font-weight: 400;
+        margin-bottom: 12px;
+        padding: 0 4px;
+        color: #202124;
+    }
+
+    /* --- KOTAK UTAMA (HERO CARD) --- */
+    .hero-card {
+        border-radius: 24px;
+        padding: 22px;
+        box-shadow: 0 1px 4px rgba(60,64,67,0.10);
+        margin-bottom: 22px;
+        border: 1px solid rgba(0,0,0,0.04);
+        color: #ffffff;
+        position: relative;
+        overflow: hidden;
+        transition: background 0.6s ease;
+    }
+
+    .saat-ini-label {
+        font-size: 14px;
+        opacity: 0.85;
+        margin-bottom: 10px;
+        position: relative;
+        z-index: 1;
+    }
+
+    .current-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        position: relative;
+        z-index: 1;
+    }
+
+    .temp-group {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .main-temp {
+        font-size: 58px;
+        font-weight: 400;
+        line-height: 1;
+        letter-spacing: -2px;
+    }
+
+    .main-icon {
+        width: 64px;
+        height: 64px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        filter: drop-shadow(0 2px 6px rgba(0,0,0,0.15));
+    }
+
+    .condition-group {
+        text-align: right;
+    }
+
+    .condition-text {
+        font-size: 16px;
+        font-weight: 500;
+        margin-bottom: 4px;
+    }
+
+    .feels-like {
+        font-size: 13px;
+        opacity: 0.85;
+    }
+
+    /* GRID INFORMASI DI DALAM KOTAK UTAMA */
+    .main-stats-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+        padding-top: 16px;
+        border-top: 1px solid rgba(255,255,255,0.25);
+        text-align: center;
+        position: relative;
+        z-index: 1;
+    }
+
+    .stat-box {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .stat-icon {
+        width: 20px;
+        height: 20px;
+        opacity: 0.9;
+    }
+
+    .stat-label {
+        font-size: 11px;
+        opacity: 0.8;
+        letter-spacing: 0.3px;
+    }
+
+    .stat-value {
+        font-size: 14px;
+        font-weight: 500;
+    }
+
+    /* --- SECTION TITLES --- */
+    .section-subtitle {
+        font-size: 15px;
+        font-weight: 500;
+        color: #202124;
+        margin-bottom: 12px;
+        padding: 0 4px;
+    }
+
+    /* --- PREDIKSI JAM-JAMAN --- */
+    .hourly-grid {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 8px;
+        margin-bottom: 24px;
+    }
+
+    .hourly-card {
+        background-color: #f8f9fa;
+        border: 1px solid #e8eaed;
+        border-radius: 16px;
+        padding: 12px 6px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+    }
+
+    .hourly-time {
+        font-size: 12px;
+        color: #5f6368;
+    }
+
+    .hourly-icon {
+        width: 30px;
+        height: 30px;
+    }
+
+    .hourly-temp {
+        font-size: 14px;
+        font-weight: 500;
+        color: #202124;
+    }
+
+    /* --- PREDIKSI HARIAN --- */
+    .daily-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+        margin-bottom: 16px;
+    }
+
+    .daily-card {
+        background-color: #f8f9fa;
+        border: 1px solid #e8eaed;
+        border-radius: 16px;
+        padding: 14px 8px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 6px;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+    }
+
+    .daily-day {
+        font-size: 12px;
+        font-weight: 500;
+        color: #3c4043;
+    }
+
+    .daily-icon {
+        width: 32px;
+        height: 32px;
+        margin: 2px 0;
+    }
+
+    .daily-rain {
+        font-size: 11px;
+        color: #1a73e8;
+    }
+
+    .daily-temps {
+        font-size: 13px;
+        color: #202124;
+        display: flex;
+        gap: 6px;
+    }
+
+    .daily-temps .low {
+        color: #5f6368;
+    }
+
+    .status-msg {
+        text-align: center;
+        font-size: 13px;
+        color: #70757a;
+        margin-bottom: 8px;
+    }
+
+    @media (max-width: 380px) {
+        .daily-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+</style>
+</head>
+<body id="body">
+
+    <div class="search-container">
+        <form id="searchForm" class="search-box">
+            <input type="text" id="searchInput" class="search-input" value="Jombang, Tangerang Selatan" placeholder="Cari lokasi cuaca..." required>
+            <button type="submit" class="search-btn">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            </button>
+        </form>
+    </div>
+
+    <div id="statusMsg" class="status-msg"></div>
+
+    <div class="weather-app">
+        <div class="location-header">
+            <div class="location-left">
+                <span class="blue-dot"></span>
+                <span id="locName">Jombang, Kota Tangerang Selatan</span>
+            </div>
+            <span class="change-area">Pilih area</span>
+        </div>
+
+        <h1 class="main-title">Cuaca</h1>
+
+        <!-- KOTAK UTAMA -->
+        <div class="hero-card" id="heroCard">
+            <div class="saat-ini-label">Saat ini</div>
+            <div class="current-row">
+                <div class="temp-group">
+                    <span id="mainTemp" class="main-temp">27°</span>
+                    <div id="mainWeatherSvg" class="main-icon"></div>
+                </div>
+                <div class="condition-group">
+                    <div id="conditionText" class="condition-text">Sebagian besar berawan</div>
+                    <div id="feelsLikeText" class="feels-like">Terasa seperti 30°</div>
+                </div>
+            </div>
+
+            <div class="main-stats-grid">
+                <div class="stat-box">
+                    <svg class="stat-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
+                    <span class="stat-label">Presipitasi</span>
+                    <span id="precipVal" class="stat-value">0%</span>
+                </div>
+                <div class="stat-box">
+                    <svg class="stat-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z"/></svg>
+                    <span class="stat-label">Kelembapan</span>
+                    <span id="humidityVal" class="stat-value">78%</span>
+                </div>
+                <div class="stat-box">
+                    <svg class="stat-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M14.5 17c0 1.38-1.12 2.5-2.5 2.5s-2.5-1.12-2.5-2.5 1.12-2.5 2.5-2.5h9v2h-6.5zm-5-10c0-1.38 1.12-2.5 2.5-2.5s2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5H2v-2h10zm9 5c0-1.38-1.12-2.5-2.5-2.5S13.5 10.62 13.5 12s1.12 2.5 2.5 2.5H22v-2h-5.5z"/></svg>
+                    <span class="stat-label">Angin</span>
+                    <span id="windVal" class="stat-value">8 km/j</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- PREDIKSI BEBERAPA JAM KE DEPAN -->
+        <div class="section-subtitle">Prediksi beberapa jam ke depan</div>
+        <div id="hourlyGrid" class="hourly-grid"></div>
+
+        <!-- PREDIKSI HARIAN -->
+        <div class="section-subtitle">Prediksi 7 hari ke depan</div>
+        <div id="dailyGrid" class="daily-grid"></div>
+    </div>
+
+    <script>
+        const searchForm = document.getElementById('searchForm');
+        const searchInput = document.getElementById('searchInput');
+        const statusMsg = document.getElementById('statusMsg');
+        const body = document.getElementById('body');
+        const heroCard = document.getElementById('heroCard');
+
+        window.addEventListener('DOMContentLoaded', () => {
+            fetchWeather("Jombang, Tangerang Selatan");
+        });
+
+        searchForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const query = searchInput.value.trim();
+            if (query) fetchWeather(query);
+        });
+
+        async function fetchWeather(query) {
+            statusMsg.textContent = "Memuat data...";
+            try {
+                const geoRes = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(query)}&count=1&language=id&format=json`);
+                const geoData = await geoRes.json();
+
+                if (!geoData.results || geoData.results.length === 0) {
+                    statusMsg.textContent = "Lokasi tidak ditemukan.";
+                    return;
+                }
+
+                const loc = geoData.results[0];
+                document.getElementById('locName').textContent = `${loc.name}, ${loc.admin1 || loc.country}`;
+
+                const params = new URLSearchParams({
+                    latitude: loc.latitude,
+                    longitude: loc.longitude,
+                    current: "temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,weather_code,wind_speed_10m,is_day",
+                    hourly: "temperature_2m,weather_code,is_day,precipitation_probability",
+                    daily: "weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max",
+                    forecast_days: "7",
+                    timezone: "auto"
+                });
+                const weatherRes = await fetch(`https://api.open-meteo.com/v1/forecast?${params.toString()}`);
+                const data = await weatherRes.json();
+
+                statusMsg.textContent = "";
+                renderWeather(data);
+
+            } catch (err) {
+                console.error(err);
+                statusMsg.textContent = "Gagal memuat cuaca.";
+            }
+        }
+
+        function renderWeather(data) {
+            const current = data.current;
+            const hourly = data.hourly;
+            const daily = data.daily;
+
+            const curTemp = Math.round(current.temperature_2m);
+            const feelsLike = Math.round(current.apparent_temperature);
+            const isDay = current.is_day === 1;
+
+            document.getElementById('mainTemp').textContent = `${curTemp}°`;
+            document.getElementById('feelsLikeText').textContent = `Terasa seperti ${feelsLike}°`;
+
+            const cond = getWeatherMeta(current.weather_code, isDay);
+            document.getElementById('conditionText').textContent = cond.label;
+            document.getElementById('mainWeatherSvg').innerHTML = cond.svg;
+            heroCard.style.background = cond.gradient;
+
+            // cari indeks jam sekarang di array hourly berdasarkan waktu current
+            const nowIso = current.time;
+            let nowIdx = hourly.time.indexOf(nowIso);
+            if (nowIdx === -1) nowIdx = 0;
+
+            const precipProb = hourly.precipitation_probability ? hourly.precipitation_probability[nowIdx] : 0;
+            document.getElementById('precipVal').textContent = `${precipProb ?? 0}%`;
+            document.getElementById('humidityVal').textContent = `${current.relative_humidity_2m}%`;
+            document.getElementById('windVal').textContent = `${Math.round(current.wind_speed_10m)} km/j`;
+
+            // Prediksi jam-jaman (5 jam ke depan)
+            const hourlyGrid = document.getElementById('hourlyGrid');
+            hourlyGrid.innerHTML = '';
+            for (let i = 0; i < 5; i++) {
+                const idx = nowIdx + i;
+                const temp = Math.round(hourly.temperature_2m[idx] ?? curTemp);
+                const code = hourly.weather_code[idx] ?? current.weather_code;
+                const hDay = hourly.is_day ? hourly.is_day[idx] === 1 : isDay;
+                const timeLabel = i === 0 ? "Sekarang" : formatHour(hourly.time[idx]);
+                const meta = getWeatherMeta(code, hDay);
+
+                hourlyGrid.innerHTML += `
+                    <div class="hourly-card">
+                        <span class="hourly-time">${timeLabel}</span>
+                        <div class="hourly-icon">${meta.smallSvg}</div>
+                        <span class="hourly-temp">${temp}°</span>
+                    </div>
+                `;
+            }
+
+            // Prediksi harian (7 hari)
+            const dailyGrid = document.getElementById('dailyGrid');
+            dailyGrid.innerHTML = '';
+            for (let i = 0; i < daily.time.length; i++) {
+                const meta = getWeatherMeta(daily.weather_code[i], true);
+                const dayLabel = i === 0 ? "Hari ini" : formatDay(daily.time[i]);
+                const hi = Math.round(daily.temperature_2m_max[i]);
+                const lo = Math.round(daily.temperature_2m_min[i]);
+                const rain = daily.precipitation_probability_max ? daily.precipitation_probability_max[i] : 0;
+
+                dailyGrid.innerHTML += `
+                    <div class="daily-card">
+                        <span class="daily-day">${dayLabel}</span>
+                        <div class="daily-icon">${meta.smallSvg}</div>
+                        <span class="daily-rain">${rain ?? 0}%</span>
+                        <span class="daily-temps"><span class="hi">${hi}°</span><span class="low">${lo}°</span></span>
+                    </div>
+                `;
+            }
+        }
+
+        function formatHour(isoString) {
+            const d = new Date(isoString);
+            return `${String(d.getHours()).padStart(2, '0')}.00`;
+        }
+
+        function formatDay(isoString) {
+            const d = new Date(isoString + 'T00:00:00');
+            const names = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
+            return names[d.getDay()];
+        }
+
+        // --- IKON & GRADASI SESUAI KODE CUACA WMO ---
+        function getWeatherMeta(code, isDay = true) {
+            const icons = {
+                sun: `<svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="9" fill="#ffb300"/><g stroke="#ffb300" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="2" x2="18" y2="6"/><line x1="18" y1="30" x2="18" y2="34"/><line x1="2" y1="18" x2="6" y2="18"/><line x1="30" y1="18" x2="34" y2="18"/><line x1="6.5" y1="6.5" x2="9.2" y2="9.2"/><line x1="26.8" y1="26.8" x2="29.5" y2="29.5"/><line x1="6.5" y1="29.5" x2="9.2" y2="26.8"/><line x1="26.8" y1="9.2" x2="29.5" y2="6.5"/></g></svg>`,
+                moon: `<svg viewBox="0 0 36 36"><path d="M23 6a13 13 0 1 0 8 20 10.5 10.5 0 0 1-8-20z" fill="#c9d2e8"/></svg>`,
+                partlyDay: `<svg viewBox="0 0 42 42"><circle cx="15" cy="15" r="8" fill="#ffb300"/><path d="M15 26c-6 0-11-4.5-11-10" stroke="none"/><path d="M14 30c-6.6 0-12-4.9-12-11 0-5.4 4-9.9 9.3-10.8-.2.9-.3 1.8-.3 2.8 0 6 4.9 11 11 11 1 0 2-.1 2.9-.4-1 4.9-5.4 8.4-10.9 8.4z" fill="#90a4ae"/><path d="M18 18c5 0 9 4 9 9s-4 9-9 9H8c-4.4 0-8-3.6-8-8 0-4 3-7.3 6.9-7.9C7 15.8 10.7 12.5 15 12.5c4.6 0 8.4 3.3 9.2 7.7-.4-.1-.8-.2-1.2-.2z" fill="none"/></svg>`,
+                partlyNight: `<svg viewBox="0 0 42 42"><path d="M20 5a9 9 0 1 0 5 16.4A7.5 7.5 0 0 1 20 5z" fill="#c9d2e8"/><path d="M12 28c-4.4 0-8-3.6-8-8 0-4 3-7.3 6.9-7.9.4 4 2.7 7.4 6 9.4-1.1 3.7-4.6 6.5-8.9 6.5z" fill="#90a4ae"/><path d="M32 20c3.9 0 7 3.1 7 7s-3.1 7-7 7H14c-4.4 0-8-3.6-8-8 0-4 3-7.3 6.9-7.9C13.6 13.8 17.3 10.5 21.6 10.5c5.2 0 9.5 4 9.9 9.1.2 0 .3-.1.5-.1z" fill="#b0bec5"/></svg>`,
+                cloud: `<svg viewBox="0 0 42 42"><path d="M12 30c-4.4 0-8-3.6-8-8 0-4.1 3.1-7.5 7.1-7.9 1.1-4.6 5.2-8 10.1-8 5.2 0 9.6 3.9 10.2 9 3.9.4 6.9 3.7 6.9 7.7 0 4.3-3.5 7.8-7.8 7.8H12z" fill="#90a4ae"/></svg>`,
+                fog: `<svg viewBox="0 0 42 42"><path d="M12 22c-4.4 0-8-3-8-6.7C4 11.7 7.1 8.9 11 8.5 12.1 4.9 15.9 2 20.4 2c4.8 0 8.8 3.3 9.5 7.6 3.5.7 6.1 3.5 6.1 6.9 0 3.7-3.5 6.7-7.8 6.7H12z" fill="#b0bec5"/><g stroke="#78909c" stroke-width="2.5" stroke-linecap="round"><line x1="6" y1="30" x2="36" y2="30"/><line x1="10" y1="35" x2="32" y2="35"/></g></svg>`,
+                drizzle: `<svg viewBox="0 0 42 42"><path d="M12 22c-4.4 0-8-3-8-6.7C4 11.7 7.1 8.9 11 8.5 12.1 4.9 15.9 2 20.4 2c4.8 0 8.8 3.3 9.5 7.6 3.5.7 6.1 3.5 6.1 6.9 0 3.7-3.5 6.7-7.8 6.7H12z" fill="#90a4ae"/><g stroke="#4fc3f7" stroke-width="2.5" stroke-linecap="round"><line x1="14" y1="27" x2="12" y2="32"/><line x1="22" y1="27" x2="20" y2="32"/><line x1="30" y1="27" x2="28" y2="32"/></g></svg>`,
+                rain: `<svg viewBox="0 0 42 42"><path d="M12 20c-4.4 0-8-3-8-6.7 0-3.6 3.1-6.4 7-6.8C12.1 2.9 15.9 0 20.4 0c4.8 0 8.8 3.3 9.5 7.6 3.5.7 6.1 3.5 6.1 6.9 0 3.7-3.5 6.7-7.8 6.7H12z" fill="#607d8b"/><g stroke="#2196f3" stroke-width="3" stroke-linecap="round"><line x1="12" y1="27" x2="9" y2="35"/><line x1="21" y1="27" x2="18" y2="35"/><line x1="30" y1="27" x2="27" y2="35"/></g></svg>`,
+                thunder: `<svg viewBox="0 0 42 42"><path d="M12 20c-4.4 0-8-3-8-6.7 0-3.6 3.1-6.4 7-6.8C12.1 2.9 15.9 0 20.4 0c4.8 0 8.8 3.3 9.5 7.6 3.5.7 6.1 3.5 6.1 6.9 0 3.7-3.5 6.7-7.8 6.7H12z" fill="#546e7a"/><path d="M22 22l-7 11h6l-3 9 11-13h-6z" fill="#ffca28"/></svg>`,
+                snow: `<svg viewBox="0 0 42 42"><path d="M12 18c-4.4 0-8-3-8-6.7 0-3.6 3.1-6.4 7-6.8C12.1.9 15.9-2 20.4-2c4.8 0 8.8 3.3 9.5 7.6 3.5.7 6.1 3.5 6.1 6.9 0 3.7-3.5 6.7-7.8 6.7H12z" fill="#b0bec5" transform="translate(0,4)"/><g stroke="#4dd0e1" stroke-width="2.2" stroke-linecap="round"><line x1="13" y1="27" x2="13" y2="35"/><line x1="9.5" y1="29" x2="16.5" y2="33"/><line x1="16.5" y1="29" x2="9.5" y2="33"/><line x1="27" y1="27" x2="27" y2="35"/><line x1="23.5" y1="29" x2="30.5" y2="33"/><line x1="30.5" y1="29" x2="23.5" y2="33"/></g></svg>`
+            };
+
+            const gradients = {
+                clearDay: "linear-gradient(160deg,#4a9eea 0%,#7cc4f5 100%)",
+                clearNight: "linear-gradient(160deg,#1a2a52 0%,#3b4d7a 100%)",
+                partlyDay: "linear-gradient(160deg,#5b9fd6 0%,#8fb8d6 100%)",
+                partlyNight: "linear-gradient(160deg,#22315a 0%,#4a5a82 100%)",
+                cloudy: "linear-gradient(160deg,#6d7f8c 0%,#93a2ac 100%)",
+                fog: "linear-gradient(160deg,#8996a0 0%,#aeb8bf 100%)",
+                rain: "linear-gradient(160deg,#3d5a73 0%,#5f7d92 100%)",
+                thunder: "linear-gradient(160deg,#2c3540 0%,#4d5b68 100%)",
+                snow: "linear-gradient(160deg,#7d93a8 0%,#aac1d1 100%)"
+            };
+
+            if (code === 0) {
+                return isDay
+                    ? { label: "Cerah", svg: icons.sun, smallSvg: icons.sun, gradient: gradients.clearDay }
+                    : { label: "Cerah", svg: icons.moon, smallSvg: icons.moon, gradient: gradients.clearNight };
+            } else if (code === 1 || code === 2) {
+                return isDay
+                    ? { label: "Cerah Berawan", svg: icons.partlyDay, smallSvg: icons.partlyDay, gradient: gradients.partlyDay }
+                    : { label: "Cerah Berawan", svg: icons.partlyNight, smallSvg: icons.partlyNight, gradient: gradients.partlyNight };
+            } else if (code === 3) {
+                return { label: "Berawan", svg: icons.cloud, smallSvg: icons.cloud, gradient: gradients.cloudy };
+            } else if (code === 45 || code === 48) {
+                return { label: "Berkabut", svg: icons.fog, smallSvg: icons.fog, gradient: gradients.fog };
+            } else if ([51, 53, 55, 56, 57].includes(code)) {
+                return { label: "Gerimis", svg: icons.drizzle, smallSvg: icons.drizzle, gradient: gradients.rain };
+            } else if ([61, 63, 65, 66, 67, 80, 81, 82].includes(code)) {
+                return { label: "Hujan", svg: icons.rain, smallSvg: icons.rain, gradient: gradients.rain };
+            } else if ([71, 73, 75, 77, 85, 86].includes(code)) {
+                return { label: "Salju", svg: icons.snow, smallSvg: icons.snow, gradient: gradients.snow };
+            } else if ([95, 96, 99].includes(code)) {
+                return { label: "Badai Petir", svg: icons.thunder, smallSvg: icons.thunder, gradient: gradients.thunder };
+            } else {
+                return { label: "Berawan", svg: icons.cloud, smallSvg: icons.cloud, gradient: gradients.cloudy };
+            }
+        }
+    </script>
+</body>
+</html>

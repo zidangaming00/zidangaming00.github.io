@@ -323,7 +323,14 @@ const Widgets = {
 
         try {
             const rawText = await API.fetchAI(query);
+            card.classList.add("is-updating");
+
+        // 2. Tunggu 200ms saat elemen transparan, baru ganti HTML & fade-in lagi
+        setTimeout(() => {
             card.innerHTML = Widgets.parseAIOverviewContent(rawText, headerTitle);
+            card.classList.remove("is-updating");
+        }, 200);
+
         } catch (err) {
             card.remove(); // Hapus widget jika fetch error agar tampilan tetap rapi
         }

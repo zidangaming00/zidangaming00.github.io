@@ -360,7 +360,13 @@ body.dark .instant-answer .logo {
    -------------------------------------------------------------------- */
 
 .ai-overview-card {
+  transition: opacity 0.25s ease-in-out;
+  opacity: 1;
   padding: 16px;
+}
+
+.ai-overview-card.is-updating {
+  opacity: 0;
 }
 
 .ai-header {

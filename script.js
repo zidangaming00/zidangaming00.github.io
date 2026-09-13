@@ -154,7 +154,9 @@ WAJIB berikan jawaban dengan format persis seperti ini (gunakan '---' sebagai pe
 ---
 [Ketik SATU judul sub-topik yang paling relevan dengan pertanyaan, misal: 'Karakteristik [Topik]' atau 'Penyebab [Topik]']
 ---
-[Berikan 3-5 poin penting (bullet). Awali setiap baris dengan '- **[Kata Kunci]:**' diikuti penjelasannya]` 
+[Berikan 3-5 poin penting (bullet). Awali setiap baris dengan '- **[Kata Kunci]:**' diikuti penjelasannya]
+---
+[Berikan 1-2 kalimat kesimpulan penutup ringkas]` 
                 },
                 { role: "user", content: promptUser }
             ],
@@ -171,6 +173,7 @@ WAJIB berikan jawaban dengan format persis seperti ini (gunakan '---' sebagai pe
         const data = await response.json();
         return data.choices[0].message.content.trim();
     }
+
 };
 
 
@@ -328,14 +331,12 @@ const Widgets = {
         
         let summary = parts[0] || formattedText;
         let subTitle = parts[1] ? parts[1].replace(/\*\*/g, '') : "";
-        let listItems = [];
+        let listContent = parts[2] || "";
+        let conclusion = parts[3] ? parts[3].replace(/\*\*/g, '') : "";
 
-        if (parts.length >= 3) {
-            let rawList = parts.slice(2).join("\n");
-            listItems = rawList.split('\n')
-                .filter(line => line.trim().match(/^[-*]/))
-                .map(line => line.replace(/^[-*]\s*/, '').trim());
-        }
+        let listItems = listContent.split('\n')
+            .filter(line => line.trim().match(/^[-*]/))
+            .map(line => line.replace(/^[-*]\s*/, '').trim());
 
         let html = `
             <div class="ai-header">
@@ -346,7 +347,6 @@ const Widgets = {
         `;
 
         if (listItems.length > 0) {
-            // Menggunakan .ai-sub-title agar tidak berwarna biru seperti link pencarian
             if (subTitle) html += `<div class="ai-sub-title">${subTitle}</div>`;
             
             html += `<ul class="dynamic-list">`;
@@ -355,19 +355,25 @@ const Widgets = {
                 html += `<li class="${hiddenClass}">${item}</li>`;
             });
             html += `</ul>`;
+        }
 
-            if (listItems.length > 1) {
-                html += `
-                    <button class="btn-show-more" onclick="Widgets.toggleAIList(this)">
-                        <span>${getText("aiMore")}</span>
-                        <svg viewBox="0 0 16 16"><path fill="currentColor" d="M3.5 5.5l4.5 4.5 4.5-4.5L14 7l-6 6-6-6z"/></svg>
-                    </button>
-                `;
-            }
+        // Render elemen kesimpulan jika ada
+        if (conclusion) {
+            html += `<div class="snippet summary-text" style="margin-top: 12px; padding-top: 8px;">${conclusion}</div>`;
+        }
+
+        if (listItems.length > 1) {
+            html += `
+                <button class="btn-show-more" onclick="Widgets.toggleAIList(this)">
+                    <span>${getText("aiMore")}</span>
+                    <svg viewBox="0 0 16 16"><path fill="currentColor" d="M3.5 5.5l4.5 4.5 4.5-4.5L14 7l-6 6-6-6z"/></svg>
+                </button>
+            `;
         }
 
         return html;
-    },
+    }
+
 
     toggleAIList: (btn) => {
         const parent = btn.closest('.ai-overview-card');

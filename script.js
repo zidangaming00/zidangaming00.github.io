@@ -326,74 +326,78 @@ const Widgets = {
     },
 
     parseAIOverviewContent: (teks, headerTitle) => {
-        let formattedText = teks.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-        const parts = formattedText.split('---').map(p => p.trim());
+    let formattedText = teks.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    const parts = formattedText.split('---').map(p => p.trim());
+    
+    let summary = parts[0] || formattedText;
+    let subTitle = parts[1] ? parts[1].replace(/\*\*/g, '') : "";
+    let listContent = parts[2] || "";
+    let conclusion = parts[3] ? parts[3].replace(/\*\*/g, '') : "";
+
+    let listItems = listContent.split('\n')
+        .filter(line => line.trim().match(/^[-*]/))
+        .map(line => line.replace(/^[-*]\s*/, '').trim());
+
+    let html = `
+        <div class="ai-header">
+            <svg viewBox="0 0 24 24"><path d="M19 9l1.25-2.75L23 5l-2.75-1.25L19 1l-1.25 2.75L15 5l2.75 1.25L19 9zm-7.5.5L9 4 6.5 9.5 1 12l5.5 2.5L9 20l2.5-5.5L17 12l-5.5-2.5zM19 15l-1.25 2.75L15 19l2.75 1.25L19 23l1.25-2.75L23 19l-2.75-1.25L19 15z"/></svg>
+            <span>${headerTitle}</span>
+        </div>
+        <div class="ai-summary-text clamped">${summary}</div>
+    `;
+
+    // Cek apakah ada konten tambahan (subtitle / list / kesimpulan)
+    const hasMoreContent = subTitle || listItems.length > 0 || conclusion;
+
+    if (hasMoreContent) {
+        html += `<div class="ai-collapsible-body hidden-content">`;
         
-        let summary = parts[0] || formattedText;
-        let subTitle = parts[1] ? parts[1].replace(/\*\*/g, '') : "";
-        let listContent = parts[2] || "";
-        let conclusion = parts[3] ? parts[3].replace(/\*\*/g, '') : "";
-
-        let listItems = listContent.split('\n')
-            .filter(line => line.trim().match(/^[-*]/))
-            .map(line => line.replace(/^[-*]\s*/, '').trim());
-
-        // Ganti class 'snippet summary-text' menjadi 'ai-summary-text' agar tidak kena line-clamp 3 baris
-        let html = `
-            <div class="ai-header">
-                <svg viewBox="0 0 24 24"><path d="M19 9l1.25-2.75L23 5l-2.75-1.25L19 1l-1.25 2.75L15 5l2.75 1.25L19 9zm-7.5.5L9 4 6.5 9.5 1 12l5.5 2.5L9 20l2.5-5.5L17 12l-5.5-2.5zM19 15l-1.25 2.75L15 19l2.75 1.25L19 23l1.25-2.75L23 19l-2.75-1.25L19 15z"/></svg>
-                <span>${headerTitle}</span>
-            </div>
-            <div class="ai-summary-text">${summary}</div>
-        `;
-
+        if (subTitle) html += `<div class="ai-sub-title">${subTitle}</div>`;
+        
         if (listItems.length > 0) {
-            if (subTitle) html += `<div class="ai-sub-title">${subTitle}</div>`;
-            
             html += `<ul class="dynamic-list">`;
-            listItems.forEach((item, index) => {
-                let hiddenClass = index > 0 ? "hidden-item" : "";
-                html += `<li class="${hiddenClass}">${item}</li>`;
+            listItems.forEach(item => {
+                html += `<li>${item}</li>`;
             });
             html += `</ul>`;
         }
 
         if (conclusion) {
-            html += `<div class="ai-summary-text" style="margin-top: 12px; padding-top: 8px;">${conclusion}</div>`;
+            html += `<div class="ai-summary-text" style="margin-top: 12px;">${conclusion}</div>`;
         }
 
-        if (listItems.length > 1) {
-            html += `
-                <button class="btn-show-more" onclick="Widgets.toggleAIList(this)">
-                    <span>${getText("aiMore")}</span>
-                    <svg viewBox="0 0 16 16"><path fill="currentColor" d="M3.5 5.5l4.5 4.5 4.5-4.5L14 7l-6 6-6-6z"/></svg>
-                </button>
-            `;
-        }
+        html += `</div>`; // Tutup ai-collapsible-body
 
-        return html;
-    },
+        html += `
+            <button class="btn-show-more" onclick="Widgets.toggleAIList(this)">
+                <span>${getText("aiMore")}</span>
+                <svg viewBox="0 0 16 16"><path fill="currentColor" d="M3.5 5.5l4.5 4.5 4.5-4.5L14 7l-6 6-6-6z"/></svg>
+            </button>
+        `;
+    }
 
-    toggleAIList: (btn) => {
-        const parent = btn.closest('.ai-overview-card');
-        if (!parent) return;
-        const hiddenItems = parent.querySelectorAll('.dynamic-list li');
-        const isExpanded = btn.classList.toggle('expanded');
-        
-        hiddenItems.forEach((item, index) => {
-            if (index > 0) {
-                if (isExpanded) {
-                    item.classList.remove('hidden-item');
-                    item.style.display = 'list-item';
-                } else {
-                    item.classList.add('hidden-item');
-                    item.style.display = 'none';
-                }
-            }
-        });
+    return html;
+},
 
-        btn.querySelector('span').textContent = isExpanded ? getText("aiLess") : getText("aiMore");
-    },
+toggleAIList: (btn) => {
+    const parent = btn.closest('.ai-overview-card');
+    if (!parent) return;
+    
+    const collapsibleBody = parent.querySelector('.ai-collapsible-body');
+    const summaryText = parent.querySelector('.ai-summary-text.clamped, .ai-summary-text.expanded-summary');
+    const isExpanded = btn.classList.toggle('expanded');
+
+    if (collapsibleBody) {
+        collapsibleBody.classList.toggle('hidden-content', !isExpanded);
+    }
+
+    if (summaryText) {
+        summaryText.classList.toggle('clamped', !isExpanded);
+        summaryText.classList.toggle('expanded-summary', isExpanded);
+    }
+
+    btn.querySelector('span').textContent = isExpanded ? getText("aiLess") : getText("aiMore");
+},
 
     checkVideoWidget: async () => {
         const slot = document.getElementById("dynamic-video-widget-slot");

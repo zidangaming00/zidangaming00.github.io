@@ -433,6 +433,27 @@ body.dark .ai-overview-card ul.dynamic-list li strong {
   color: #e8eaed;
 }
 
+/* Membatasi paragraf utama maksimal 3 baris saat ringkas */
+.ai-summary-text.clamped {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ai-summary-text.expanded-summary {
+  display: block;
+}
+
+/* Menyembunyikan seluruh blok detail sebelum Show More diklik */
+.ai-collapsible-body.hidden-content {
+  display: none !important;
+}
+
+.ai-collapsible-body {
+  margin-top: 10px;
+}
 
 .btn-show-more {
   display: flex;

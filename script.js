@@ -339,36 +339,35 @@ const Widgets = {
         .filter(line => line.trim().match(/^[-*]/))
         .map(line => line.replace(/^[-*]\s*/, '').trim());
 
+    const hasMoreContent = subTitle || listItems.length > 0 || conclusion;
+
+    // 1. Bungkus seluruh isi teks di dalam .ai-content-wrapper
     let html = `
         <div class="ai-header">
             <svg viewBox="0 0 24 24"><path d="M19 9l1.25-2.75L23 5l-2.75-1.25L19 1l-1.25 2.75L15 5l2.75 1.25L19 9zm-7.5.5L9 4 6.5 9.5 1 12l5.5 2.5L9 20l2.5-5.5L17 12l-5.5-2.5zM19 15l-1.25 2.75L15 19l2.75 1.25L19 23l1.25-2.75L23 19l-2.75-1.25L19 15z"/></svg>
             <span>${headerTitle}</span>
         </div>
-        <div class="ai-summary-text clamped">${summary}</div>
+        <div class="ai-content-wrapper">
+            <div class="ai-summary-text">${summary}</div>
     `;
 
-    // Cek apakah ada konten tambahan (subtitle / list / kesimpulan)
-    const hasMoreContent = subTitle || listItems.length > 0 || conclusion;
-
     if (hasMoreContent) {
-        html += `<div class="ai-collapsible-body hidden-content">`;
-        
+        html += `<div class="ai-collapsible-body">`;
         if (subTitle) html += `<div class="ai-sub-title">${subTitle}</div>`;
-        
         if (listItems.length > 0) {
             html += `<ul class="dynamic-list">`;
-            listItems.forEach(item => {
-                html += `<li>${item}</li>`;
-            });
+            listItems.forEach(item => { html += `<li>${item}</li>`; });
             html += `</ul>`;
         }
-
         if (conclusion) {
             html += `<div class="ai-summary-text" style="margin-top: 12px;">${conclusion}</div>`;
         }
+        html += `</div>`;
+    }
 
-        html += `</div>`; // Tutup ai-collapsible-body
+    html += `</div>`; // Tutup .ai-content-wrapper
 
+    if (hasMoreContent) {
         html += `
             <button class="btn-show-more" onclick="Widgets.toggleAIList(this)">
                 <span>${getText("aiMore")}</span>
@@ -384,17 +383,12 @@ toggleAIList: (btn) => {
     const parent = btn.closest('.ai-overview-card');
     if (!parent) return;
     
-    const collapsibleBody = parent.querySelector('.ai-collapsible-body');
-    const summaryText = parent.querySelector('.ai-summary-text.clamped, .ai-summary-text.expanded-summary');
+    // 2. Control class expanded langsung pada wrapper utama
+    const wrapper = parent.querySelector('.ai-content-wrapper');
     const isExpanded = btn.classList.toggle('expanded');
 
-    if (collapsibleBody) {
-        collapsibleBody.classList.toggle('hidden-content', !isExpanded);
-    }
-
-    if (summaryText) {
-        summaryText.classList.toggle('clamped', !isExpanded);
-        summaryText.classList.toggle('expanded-summary', isExpanded);
+    if (wrapper) {
+        wrapper.classList.toggle('expanded', isExpanded);
     }
 
     btn.querySelector('span').textContent = isExpanded ? getText("aiLess") : getText("aiMore");

@@ -433,33 +433,27 @@ body.dark .ai-overview-card ul.dynamic-list li strong {
   color: #e8eaed;
 }
 
-/* Container pembungkus teks & detail AI Overview */
+/* Container pembungkus teks */
 .ai-content-wrapper {
   position: relative;
-  max-height: 90px; /* Tinggi elemen saat ringkas (sekitar 3 baris) */
+  max-height: 120px; /* Batas tinggi sebelum di-expand */
   overflow: hidden;
-  transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  
-  /* Efek gradien teks memudar di bagian bawah persis Google */
-  -webkit-mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
-  mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
+  transition: max-height 0.4s ease;
+  -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 40%, rgba(0,0,0,0) 100%);
+  mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 40%, rgba(0,0,0,0) 100%);
 }
 
-/* Saat Show More diklik (tambahkan class .expanded pada container di JS) */
 .ai-content-wrapper.expanded {
-  max-height: 2000px; /* Nilai batas atas tinggi saat terbuka */
-  -webkit-mask-image: linear-gradient(to bottom, black 100%, black 100%);
-  mask-image: linear-gradient(to bottom, black 100%, black 100%);
+  max-height: 2000px;
+  -webkit-mask-image: none;
+  mask-image: none;
 }
+
+
 
 /* Menonaktifkan pemotongan teks kaku ellipsis (...) */
 .ai-summary-text.clamped {
   display: block;
-}
-
-/* Memastikan elemen collapsible tetap ada di DOM agar animasi height berjalan */
-.ai-collapsible-body.hidden-content {
-  display: block !important;
 }
 
 .ai-collapsible-body {

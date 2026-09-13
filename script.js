@@ -143,14 +143,14 @@ const API = {
         return res.json();
     },
 
-    fetchAI: async (promptUser) => {
+    fetchAI: async (promptUser, context = "") => {
         const url = "https://api.groq.com/openai/v1/chat/completions";
         const payload = {
             model: "openai/gpt-oss-20b",
             messages: [
                 { 
                     role: "system", 
-                    content: `Kamu adalah AI Search Overview. Jangan pernah gunakan sapaan. 
+                    content: `Kamu adalah AI Search Overview, sebelum menjawab pastikan kamu baca dahulu ${context}. Jangan pernah gunakan sapaan. 
 WAJIB berikan jawaban dengan format persis seperti ini (gunakan '---' sebagai pemisah):
 [Paragraf definisi singkat tentang topik, maksimal 3 kalimat]
 ---

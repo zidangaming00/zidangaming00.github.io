@@ -242,7 +242,7 @@ const Widgets = {
         if (!mainResult) return;
         
         // Panggil Widget AI Overview (menggunakan Regex internal di checkAIOverview)
-        Widgets.checkAIOverview();
+        Widgets.checkAIOverview(res);
 
         const isTime = /jam|waktu|time|clock/.test(query) && query.length < 15 && query.split(" ").length < 4;
         const isDate = /tanggal|date/.test(query) && query.length < 15 && query.split(" ").length < 4;
@@ -288,6 +288,7 @@ const Widgets = {
 
     // --- WIDGET AI OVERVIEW ---
     checkAIOverview: async () => {
+        if (res?.spelling) return;
         const query = Config.q.trim();
         const mainResult = document.querySelector(".main-result .results-list");
         if (!mainResult || !query || query.length < 4) return;
@@ -948,7 +949,7 @@ function renderWebResults(res) {
     if (res.spelling) {
       container.insertAdjacentHTML('beforeend', `<div class="corrected-word result-card result-card--flat"><div class="snippet">${getText("correct")} <a href="/search?q=${encodeURIComponent(res.spelling.correctedQuery)}${searchLangParam}">${res.spelling.correctedQuery}</a><span>?</span></div></div>`);
     }
-    Widgets.renderWidgets();
+    Widgets.renderWidgets(res);
   }
 
   res.items.forEach((item, i) => {

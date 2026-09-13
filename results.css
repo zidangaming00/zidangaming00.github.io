@@ -433,27 +433,39 @@ body.dark .ai-overview-card ul.dynamic-list li strong {
   color: #e8eaed;
 }
 
-/* Membatasi paragraf utama maksimal 3 baris saat ringkas */
-.ai-summary-text.clamped {
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
+/* Container pembungkus teks & detail AI Overview */
+.ai-content-wrapper {
+  position: relative;
+  max-height: 90px; /* Tinggi elemen saat ringkas (sekitar 3 baris) */
   overflow: hidden;
-  text-overflow: ellipsis;
+  transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  
+  /* Efek gradien teks memudar di bagian bawah persis Google */
+  -webkit-mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
+  mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
 }
 
-.ai-summary-text.expanded-summary {
+/* Saat Show More diklik (tambahkan class .expanded pada container di JS) */
+.ai-content-wrapper.expanded {
+  max-height: 2000px; /* Nilai batas atas tinggi saat terbuka */
+  -webkit-mask-image: linear-gradient(to bottom, black 100%, black 100%);
+  mask-image: linear-gradient(to bottom, black 100%, black 100%);
+}
+
+/* Menonaktifkan pemotongan teks kaku ellipsis (...) */
+.ai-summary-text.clamped {
   display: block;
 }
 
-/* Menyembunyikan seluruh blok detail sebelum Show More diklik */
+/* Memastikan elemen collapsible tetap ada di DOM agar animasi height berjalan */
 .ai-collapsible-body.hidden-content {
-  display: none !important;
+  display: block !important;
 }
 
 .ai-collapsible-body {
   margin-top: 10px;
 }
+
 
 .btn-show-more {
   display: flex;

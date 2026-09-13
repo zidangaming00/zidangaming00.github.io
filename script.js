@@ -25,7 +25,7 @@ const Config = {
 
 // Mengambil pengaturan dari Cookies
 const settings = typeof getData === 'function' ? getData() : {};
-const isIdLang = settings.lang === "id" || Config.hl === "id"; // pastikan mencocokkan "id" jika di cookie.js defaultnya "en"
+const isIdLang = settings.lang === "id" || Config.hl === "id";
 
 const searchLangParam = isIdLang ? `&hl=${Config.hl}` : "";
 const localLang = isIdLang ? "id-ID" : "en-US";
@@ -34,7 +34,7 @@ const isFaviconDisabled = Config.fv == 0 || settings.fv === 0 || settings.fv ===
 
 let searchParam = "";
 searchParam += Config.uf == 1 ? "&uf=1" : "";
-searchParam += isFaviconDisabled ? "&fv=0" : ""; // <-- Tambahkan baris ini
+searchParam += isFaviconDisabled ? "&fv=0" : "";
 searchParam += Config.sf == 1 ? "&sf=1" : "";
 searchParam += Config.th == 1 ? "&th=1" : "";
 
@@ -50,6 +50,7 @@ const LANG_DICT = {
         noSiteInfo: "There is no information on this page.", suggtext: "Search suggestion:", adlabel: "Ad",
         noresultsug: ["Try different keywords.", "Try more general keywords.", "Try fewer keywords."],
         tab: ["All", "Images", "Videos", "News", "Maps"],
+        aiHeader: "AI Overview (Beta)", aiMore: "Show more", aiLess: "Show less"
     },
     id: {
         news: "Hasil berita <pre>Beta</pre>", more: "Hasil penelusuran lainnya", vidTitle: "Video",
@@ -58,6 +59,7 @@ const LANG_DICT = {
         noSiteInfo: "Tidak ada informasi mengenai halaman ini.", suggtext: "Saran pencarian:", adlabel: "Iklan",
         noresultsug: ["Coba kata kunci yang berbeda.", "Coba kata kunci yang lebih umum.", "Coba lebih sedikit kata kunci."],
         tab: ["Semua", "Gambar", "Video", "Berita", "Peta"],
+        aiHeader: "Ringkasan AI (Beta)", aiMore: "Tampilkan lainnya", aiLess: "Tampilkan lebih sedikit"
     }
 };
 
@@ -102,7 +104,6 @@ const Utils = {
 
         return (year === currentYear && !skip) ? Utils.timeAgo(parsedDate) : `${day} ${month} ${year}`;
     },
-
 };
 
 
@@ -111,6 +112,7 @@ const Utils = {
 // ==========================================
 const API = {
     baseUrl: 'https://datasearch.searchdata.workers.dev',
+    groqKeys: ["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"],
     
     fetchWeb: async (query, page) => {
         const langFilter = isIdLang ? `&gl=${Config.hl}&lr=lang_id&hl=id` : "";
@@ -137,6 +139,37 @@ const API = {
     fetchSuggestions: async (query) => {
         const res = await fetch(`${API.baseUrl}/suggest?q=${query}`);
         return res.json();
+    },
+
+    fetchAI: async (promptUser) => {
+        const url = "https://api.groq.com/openai/v1/chat/completions";
+        const payload = {
+            model: "openai/gpt-oss-20b",
+            messages: [
+                { 
+                    role: "system", 
+                    content: `Kamu adalah AI Search Overview. Jangan pernah gunakan sapaan. 
+WAJIB berikan jawaban dengan format persis seperti ini (gunakan '---' sebagai pemisah):
+[Paragraf definisi singkat tentang topik, maksimal 3 kalimat]
+---
+[Ketik SATU judul sub-topik yang paling relevan dengan pertanyaan, misal: 'Karakteristik [Topik]' atau 'Penyebab [Topik]']
+---
+[Berikan 3-5 poin penting (bullet). Awali setiap baris dengan '- **[Kata Kunci]:**' diikuti penjelasannya]` 
+                },
+                { role: "user", content: promptUser }
+            ],
+            temperature: 0.3
+        };
+
+        const response = await fetch(url, {
+            method: "POST",
+            headers: { "Authorization": `Bearer ${API.groqKeys[0]}`, "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const data = await response.json();
+        return data.choices[0].message.content.trim();
     }
 };
 
@@ -150,19 +183,13 @@ const Widgets = {
         const container = document.createElement("div");
         container.className = "instant-answer";
 
-        // Ambil keterangan/subtitle (Wikidata description)
         let subtitle = "";
         if (res.infobox && Array.isArray(res.infobox)) {
             const descItem = res.infobox.find(item => item.label === "Wikidata description" || item.data_type === "wd_description");
-            if (descItem) {
-                subtitle = descItem.value;
-            }
+            if (descItem) subtitle = descItem.value;
         }
 
-        let imageHtml = '';
-        if (res.image) {
-            imageHtml = `<img src="${res.image}" class="logo" alt="${res.title}" ${res.type ? 'style="border:1px solid #999"' : ''}>`;
-        }
+        let imageHtml = res.image ? `<img src="${res.image}" class="logo" alt="${res.title}" ${res.type ? 'style="border:1px solid #999"' : ''}>` : '';
 
         let infoboxHtml = '';
         if (res.infobox && res.infobox.length > 0) {
@@ -175,9 +202,7 @@ const Widgets = {
                     </div>
                 `;
             }).join("");
-            if (items) {
-                infoboxHtml = `<div class="infobox">${items}</div>`;
-            }
+            if (items) infoboxHtml = `<div class="infobox">${items}</div>`;
         }
 
         container.innerHTML = `
@@ -187,7 +212,7 @@ const Widgets = {
             <div class="summary-box">
                 <div class="instant-answer__section-title">Ringkasan</div>
                 <div class="summary-text">
-                    ${res.snippet.replace(/\<\/?(pre|code).*?\/?\>/g, "").slice(0, 140)}... 
+                    ${res.snippet.replace(/\<\/?(pre|code).*?\/>/g, "").slice(0, 140)}... 
                     <a href="${res.sourceUrl}" class="wikipedia">${res.source} ›</a>
                 </div>
             </div>
@@ -203,11 +228,8 @@ const Widgets = {
         if (Config.windowWidth > 780) {
             wrapper.appendChild(container);
         } else {
-            if (wrapper) {
-                Utils.insertAfter(wrapper, container);
-            } else {
-                document.querySelector(".main-result").appendChild(container);
-            }
+            if (wrapper) Utils.insertAfter(wrapper, container);
+            else document.querySelector(".main-result").appendChild(container);
         }
     },
 
@@ -216,6 +238,9 @@ const Widgets = {
         const mainResult = document.querySelector(".main-result .results-list");
         if (!mainResult) return;
         
+        // Panggil Widget AI Overview (menggunakan Regex internal di checkAIOverview)
+        Widgets.checkAIOverview();
+
         const isTime = /jam|waktu|time|clock/.test(query) && query.length < 15 && query.split(" ").length < 4;
         const isDate = /tanggal|date/.test(query) && query.length < 15 && query.split(" ").length < 4;
         const isCalc = (/kalkulator|calculator/.test(query) && query.split(" ").length <= 2) || (/calculator\s+online|kalkulator\s+online/.test(query) && query.split(" ").length <= 3);
@@ -258,59 +283,157 @@ const Widgets = {
         }
     },
 
-checkVideoWidget: async () => {
-    const slot = document.getElementById("dynamic-video-widget-slot");
-    if (!slot) return;
-    try {
-        const data = await API.fetchVideo(Config.q, 4);
-        if (!data.items || !data.items.length) {
-            slot.remove();
-            return;
+    // --- WIDGET AI OVERVIEW ---
+    checkAIOverview: async () => {
+        const query = Config.q.trim();
+        const mainResult = document.querySelector(".main-result .results-list");
+        if (!mainResult || !query || query.length < 4) return;
+
+        // Regex untuk memastikan kata pencarian berupa pertanyaan
+        const isQuestion = /(\?|\b(apa|siapa|mengapa|kenapa|bagaimana|kapan|di\s*mana|dimana|jelaskan|sebutkan|resep|cara)\b)/i.test(query);
+        if (!isQuestion) return;
+
+        // Gunakan class .result-card .result-card--flat yang sudah ada
+        const card = document.createElement("div");
+        card.className = "result-card result-card--flat ai-overview-card";
+        
+        const headerTitle = getText("aiHeader");
+
+        // Skeleton loading
+        card.innerHTML = `
+            <div class="ai-header">
+                <svg viewBox="0 0 24 24"><path d="M19 9l1.25-2.75L23 5l-2.75-1.25L19 1l-1.25 2.75L15 5l2.75 1.25L19 9zm-7.5.5L9 4 6.5 9.5 1 12l5.5 2.5L9 20l2.5-5.5L17 12l-5.5-2.5zM19 15l-1.25 2.75L15 19l2.75 1.25L19 23l1.25-2.75L23 19l-2.75-1.25L19 15z"/></svg>
+                <span>${headerTitle}</span>
+            </div>
+            <div class="bone-container">
+                <div class="bone-line"></div>
+                <div class="bone-line medium"></div>
+                <div class="bone-line short"></div>
+            </div>
+        `;
+
+        mainResult.insertAdjacentElement('afterbegin', card);
+
+        try {
+            const rawText = await API.fetchAI(query);
+            card.innerHTML = Widgets.parseAIOverviewContent(rawText, headerTitle);
+        } catch (err) {
+            card.remove(); // Hapus widget jika fetch error agar tampilan tetap rapi
+        }
+    },
+
+    parseAIOverviewContent: (teks, headerTitle) => {
+        let formattedText = teks.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        const parts = formattedText.split('---').map(p => p.trim());
+        
+        let summary = parts[0] || formattedText;
+        let subTitle = parts[1] ? parts[1].replace(/\*\*/g, '') : "";
+        let listItems = [];
+
+        if (parts.length >= 3) {
+            let rawList = parts.slice(2).join("\n");
+            listItems = rawList.split('\n')
+                .filter(line => line.trim().match(/^[-*]/))
+                .map(line => line.replace(/^[-*]\s*/, '').trim());
         }
 
-        let videonya = "";
-        let limit = Math.min(data.items.length, 4);
-        for (let i = 0; i < limit; i++) {
-            let item = data.items[i];
-            let videoId = item.id.videoId || item.id;
-            let title = Utils.escapeHTML(item.snippet.title);
-            let thumb = item.snippet.thumbnails.medium.url;
-            let channel = Utils.escapeHTML(item.snippet.channelTitle);
-            let dateStr = Utils.dateConversion(item.snippet.publishTime);
+        let html = `
+            <div class="ai-header">
+                <svg viewBox="0 0 24 24"><path d="M19 9l1.25-2.75L23 5l-2.75-1.25L19 1l-1.25 2.75L15 5l2.75 1.25L19 9zm-7.5.5L9 4 6.5 9.5 1 12l5.5 2.5L9 20l2.5-5.5L17 12l-5.5-2.5zM19 15l-1.25 2.75L15 19l2.75 1.25L19 23l1.25-2.75L23 19l-2.75-1.25L19 15z"/></svg>
+                <span>${headerTitle}</span>
+            </div>
+            <div class="snippet summary-text">${summary}</div>
+        `;
 
-            videonya += `
-                <div class="video-widget-item">
-                    <a href="https://youtube.com/watch?v=${videoId}">
-                        <div class="video-widget-item__row">
-                            <div class="thumbnail">
-                                <img src="${thumb}">
-                                <div class="video-widget-item__play">
-                                    <span class="play-icon">
-                                        <svg focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                                            <circle fill="#fff" cx="12" cy="12" r="6.2"/>
-                                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5"></path>
-                                        </svg>
-                                    </span>
+        if (listItems.length > 0) {
+            if (subTitle) html += `<div class="title section-title">${subTitle}</div>`;
+            html += `<ul class="dynamic-list">`;
+            listItems.forEach((item, index) => {
+                let hiddenClass = index > 0 ? "hidden-item" : "";
+                html += `<li class="${hiddenClass}">${item}</li>`;
+            });
+            html += `</ul>`;
+
+            if (listItems.length > 1) {
+                html += `
+                    <button class="btn-show-more" onclick="Widgets.toggleAIList(this)">
+                        <span>${getText("aiMore")}</span>
+                        <svg viewBox="0 0 16 16"><path fill="currentColor" d="M3.5 5.5l4.5 4.5 4.5-4.5L14 7l-6 6-6-6z"/></svg>
+                    </button>
+                `;
+            }
+        }
+
+        return html;
+    },
+
+    toggleAIList: (btn) => {
+        const parent = btn.closest('.ai-overview-card');
+        if (!parent) return;
+        const hiddenItems = parent.querySelectorAll('.dynamic-list li');
+        const isExpanded = btn.classList.toggle('expanded');
+        
+        hiddenItems.forEach((item, index) => {
+            if (index > 0) {
+                item.style.display = isExpanded ? 'list-item' : 'none';
+            }
+        });
+
+        btn.querySelector('span').textContent = isExpanded ? getText("aiLess") : getText("aiMore");
+    },
+
+    checkVideoWidget: async () => {
+        const slot = document.getElementById("dynamic-video-widget-slot");
+        if (!slot) return;
+        try {
+            const data = await API.fetchVideo(Config.q, 4);
+            if (!data.items || !data.items.length) {
+                slot.remove();
+                return;
+            }
+
+            let videonya = "";
+            let limit = Math.min(data.items.length, 4);
+            for (let i = 0; i < limit; i++) {
+                let item = data.items[i];
+                let videoId = item.id.videoId || item.id;
+                let title = Utils.escapeHTML(item.snippet.title);
+                let thumb = item.snippet.thumbnails.medium.url;
+                let channel = Utils.escapeHTML(item.snippet.channelTitle);
+                let dateStr = Utils.dateConversion(item.snippet.publishTime);
+
+                videonya += `
+                    <div class="video-widget-item">
+                        <a href="https://youtube.com/watch?v=${videoId}">
+                            <div class="video-widget-item__row">
+                                <div class="thumbnail">
+                                    <img src="${thumb}">
+                                    <div class="video-widget-item__play">
+                                        <span class="play-icon">
+                                            <svg focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                                                <circle fill="#fff" cx="12" cy="12" r="6.2"/>
+                                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5"></path>
+                                            </svg>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="video-widget-item__text">
+                                    <div class="video-widget-item__title">${title}</div>
+                                    <div class="video-widget-item__meta">YouTube<span class="dot"></span><div class="video-widget-item__channel">${channel}</div></div>
+                                    <div class="video-widget-item__date">${dateStr}</div>
                                 </div>
                             </div>
-                            <div class="video-widget-item__text">
-                                <div class="video-widget-item__title">${title}</div>
-                                <div class="video-widget-item__meta">YouTube<span class="dot"></span><div class="video-widget-item__channel">${channel}</div></div>
-                                <div class="video-widget-item__date">${dateStr}</div>
-                            </div>
-                        </div>
-                    </a>
-                </div>`;
+                        </a>
+                    </div>`;
+            }
+
+            slot.className = "result-card video-widget result-card--flat";
+            slot.innerHTML = `<div class="title video-widget__title">${getText("vidTitle")}</div><div class="video-widget__list">${videonya}</div>`;
+        } catch (err) {
+            slot.remove();
+            console.log("Gagal memuat widget video:", err);
         }
-
-        slot.className = "result-card video-widget result-card--flat";
-        slot.innerHTML = `<div class="title video-widget__title">${getText("vidTitle")}</div><div class="video-widget__list">${videonya}</div>`;
-    } catch (err) {
-        slot.remove();
-        console.log("Gagal memuat widget video:", err);
-    }
-},
-
+    },
 
     initCalculator: () => {
         const calculatorBox = document.querySelector(".calculator");
@@ -338,14 +461,13 @@ checkVideoWidget: async () => {
     },
 
     initTranslator: () => {
-        // Daftar negara disingkat untuk keterbacaan, tambahkan sesuai aslinya jika perlu
         const countries = { en: "English", id: "Indonesian", es: "Spanish", fr: "French", de: "German", ja: "Japanese", ko: "Korean", zh: "Chinese" }; 
         const container = document.querySelector(".trnsl");
         if (!container) return;
 
         const fromText = container.querySelector(".from-text"), toText = container.querySelector(".to-text");
         const exchangeIcon = container.querySelector(".exchange"), selects = container.querySelectorAll("select");
-        let isTranslating = false, timer;
+        let timer;
 
         selects.forEach((sel, i) => {
             for (let code in countries) {
@@ -397,7 +519,7 @@ const UI = {
     } else {
       document.body.classList.remove("dark");
     }
-    const svgIcons = { all: `<svg width="16" height="16" viewBox="0 0 16 16" fill="#6e7780"><path fill-rule="evenodd" clip-rule="evenodd" d="M6 1C2.686 1 0 3.686 0 7C0 10.314 2.686 13 6 13C7.647 13 9.138 12.337 10.223 11.263L14.787 14.84C15.113 15.096 15.585 15.039 15.84 14.713C16.096 14.387 16.039 13.915 15.713 13.66L11.149 10.083C11.689 9.182 12 8.127 12 7C12 3.686 9.314 1 6 1ZM1.5 7C1.5 4.515 3.515 2.5 6 2.5C8.485 2.5 10.5 4.515 10.5 7C10.5 9.485 8.485 11.5 6 11.5C3.515 11.5 1.5 9.485 1.5 7Z"></path></svg>`, images: `<svg width="16" height="16" viewBox="0 0 16 16" fill="#6e7780"><path fill-rule="evenodd" clip-rule="evenodd" d="M3.25 1C1.455 1 0 2.455 0 4.25V11.75C0 13.545 1.455 15 3.25 15H12.75C14.545 15 16 13.545 16 11.75V10.259C16 10.253 16 10.247 16 10.241V4.25C16 2.455 14.545 1 12.75 1H3.25ZM14.5 8.439V4.25C14.5 3.284 13.716 2.5 12.75 2.5H3.25C2.284 2.5 1.5 3.284 1.5 4.25V11.75C1.5 11.956 1.536 12.154 1.601 12.338L5.97 7.97C6.263 7.677 6.737 7.677 7.03 7.97L8 8.939L10.97 5.97C11.263 5.677 11.737 5.677 12.03 5.97L14.5 8.439ZM9.061 10L10.03 10.97C10.323 11.263 10.323 11.737 10.03 12.03C9.737 12.323 9.263 12.323 8.97 12.03L6.5 9.561L2.662 13.399C2.846 13.464 3.044 13.5 3.25 13.5H12.75C13.716 13.5 14.5 12.716 14.5 11.75V10.561L11.5 7.561L9.061 10Z"></path></svg>`, videos: `<svg width="16" height="16" viewBox="0 0 16 16" fill="#6e7780"><path fill-rule="evenodd" clip-rule="evenodd" d="M13.489 5.55C15.38 6.636 15.38 9.364 13.489 10.45L6.231 14.616C4.348 15.698 2 14.338 2 12.166L2 3.834C2 1.662 4.348 0.303 6.231 1.384L13.489 5.55ZM12.742 9.149C13.629 8.64 13.629 7.36 12.742 6.851L5.485 2.685C4.601 2.178 3.5 2.816 3.5 3.834L3.5 12.166C3.5 13.185 4.601 13.823 5.485 13.316L12.742 9.149Z"></path></svg>`, news: `<svg width="16" height="16" viewBox="0 0 22 22" fill="#6e7780"><path d="M12 11h6v2h-6v-2zm-6 6h12v-2H6v2zm0-4h4V7H6v6zm16-7.22v12.44c0 1.54-1.34 2.78-3 2.78H5c-1.64 0-3-1.25-3-2.78V5.78C2 4.26 3.36 3 5 3h14c1.64 0 3 1.25 3 2.78zM19.99 12V5.78c0-.42-.46-.78-1-.78H5c-.54 0-1 .36-1 .78v12.44c0 .42.46.78 1 .78h14c.54 0 1-.36 1-.78V12zM12 9h6V7h-6v2"></path></svg>`, maps: `<svg width="16" height="16" viewBox="0 0 16 16" fill="#6e7780"><path d="M8 8C9.105 8 10 7.105 10 6C10 4.895 9.105 4 8 4C6.895 4 6 4.895 6 6C6 7.105 6.895 8 8 8Z"></path></svg>` }; 
+    const svgIcons = { all: `<svg width="16" height="16" viewBox="0 0 16 16" fill="#6e7780"><path fill-rule="evenodd" clip-rule="evenodd" d="M6 1C2.686 1 0 3.686 0 7C0 10.314 2.686 13 10.223 11.263L14.787 14.84C15.113 15.096 15.585 15.039 15.84 14.713C16.096 14.387 16.039 13.915 15.713 13.66L11.149 10.083C11.689 9.182 12 8.127 12 7C12 3.686 9.314 1 6 1ZM1.5 7C1.5 4.515 3.515 2.5 6 2.5C8.485 2.5 10.5 4.515 10.5 7C10.5 9.485 8.485 11.5 6 11.5C3.515 11.5 1.5 9.485 1.5 7Z"></path></svg>`, images: `<svg width="16" height="16" viewBox="0 0 16 16" fill="#6e7780"><path fill-rule="evenodd" clip-rule="evenodd" d="M3.25 1C1.455 1 0 2.455 0 4.25V11.75C0 13.545 1.455 15 3.25 15H12.75C14.545 15 16 13.545 16 11.75V10.259C16 10.253 16 10.247 16 10.241V4.25C16 2.455 14.545 1 12.75 1H3.25ZM14.5 8.439V4.25C14.5 3.284 13.716 2.5 12.75 2.5H3.25C2.284 2.5 1.5 3.284 1.5 4.25V11.75C1.5 11.956 1.536 12.154 1.601 12.338L5.97 7.97C6.263 7.677 6.737 7.677 7.03 7.97L8 8.939L10.97 5.97C11.263 5.677 11.737 5.677 12.03 5.97L14.5 8.439ZM9.061 10L10.03 10.97C10.323 11.263 10.323 11.737 10.03 12.03C9.737 12.323 9.263 12.323 8.97 12.03L6.5 9.561L2.662 13.399C2.846 13.464 3.044 13.5 3.25 13.5H12.75C13.716 13.5 14.5 12.716 14.5 11.75V10.561L11.5 7.561L9.061 10Z"></path></svg>`, videos: `<svg width="16" height="16" viewBox="0 0 16 16" fill="#6e7780"><path fill-rule="evenodd" clip-rule="evenodd" d="M13.489 5.55C15.38 6.636 15.38 9.364 13.489 10.45L6.231 14.616C4.348 15.698 2 14.338 2 12.166L2 3.834C2 1.662 4.348 0.303 6.231 1.384L13.489 5.55ZM12.742 9.149C13.629 8.64 13.629 7.36 12.742 6.851L5.485 2.685C4.601 2.178 3.5 2.816 3.5 3.834L3.5 12.166C3.5 13.185 4.601 13.823 5.485 13.316L12.742 9.149Z"></path></svg>`, news: `<svg width="16" height="16" viewBox="0 0 22 22" fill="#6e7780"><path d="M12 11h6v2h-6v-2zm-6 6h12v-2H6v2zm0-4h4V7H6v6zm16-7.22v12.44c0 1.54-1.34 2.78-3 2.78H5c-1.64 0-3-1.25-3-2.78V5.78C2 4.26 3.36 3 5 3h14c1.64 0 3 1.25 3 2.78zM19.99 12V5.78c0-.42-.46-.78-1-.78H5c-.54 0-1 .36-1 .78v12.44c0 .42.46.78 1 .78h14c.54 0 1-.36 1-.78V12zM12 9h6V7h-6v2"></path></svg>`, maps: `<svg width="16" height="16" viewBox="0 0 16 16" fill="#6e7780"><path d="M8 8C9.105 8 10 7.105 10 6C10 4.895 9.105 4 8 4C6.895 4 6 4.895 6 6C6 7.105 6.895 8 8 8Z"></path></svg>` }; 
     const createTab = (id, tbmVal, icon, label) => `<div class="search-item"><a href="/search?q=${encodeURIComponent(Config.q).replace(/%20/g,'+')}${tbmVal}${searchLangParam}${searchParam}" class="tab-wrapper" tab-id="${id}"><div class="label">${Config.windowWidth >= 780 ? svgIcons[icon] : ''}<span>${getText("tab", label)}</span></div></a></div>`; 
     
     document.body.innerHTML = ` 
@@ -430,7 +552,6 @@ const UI = {
     UI.setupEventListeners(); 
   },
 
-
     setupEventListeners: () => {
         const searchInput = document.querySelector(".search-input");
         const clearBtn = document.querySelector(".cleartext");
@@ -440,7 +561,6 @@ const UI = {
 
         SuggestionsManager.init();
 
-        // PERBAIKAN 1: Cek langsung saat halaman dimuat apakah input sudah ada isinya (dari URL)
         if (searchInput.value.trim() && clearBtn) {
             clearBtn.style.display = "block";
         }
@@ -451,15 +571,12 @@ const UI = {
 
         if (clearBtn) {
             clearBtn.addEventListener('click', () => { 
-                // TAMBAHAN: Simpan nilai sebelum dihapus sebagai backup untuk tombol back popup
                 searchInput.setAttribute('data-backup-value', searchInput.value);
-                
                 searchInput.value = ""; 
                 searchInput.focus(); 
                 clearBtn.style.display = "none"; 
             });
         }
-
 
         searchInput.addEventListener('keyup', (e) => { 
             if (e.key === "Enter" && toggleBtn) toggleBtn.click(); 
@@ -525,10 +642,9 @@ const UI = {
 };
 
 // ==========================================
-// SUGGESTION MANAGER (MOBILE OVERLAY & DESKTOP DROPDOWN)
+// SUGGESTION MANAGER
 // ==========================================
 const SuggestionsManager = {
-    // Cek apakah setting suggest diizinkan (default: true jika belum diatur)
     isEnabled: () => {
         return settings.sug !== false && settings.suggest !== false && settings.sug !== 0 && settings.suggest !== 0;
     },
@@ -542,12 +658,10 @@ const SuggestionsManager = {
         if (!mainInput) return;
 
         if (Config.windowWidth < 780 || Config.isMobile) {
-            // Event Mobile: saat input di-fokuskan, buka Popup Overlay
             mainInput.addEventListener("focus", () => {
                 SuggestionsManager.openMobileOverlay(mainInput.value);
             });
         } else {
-            // Event Desktop: tampilkan Dropdown di bawah Search Bar
             mainInput.addEventListener("input", (e) => {
                 const query = e.target.value.trim();
                 SuggestionsManager.handleDesktopInput(query);
@@ -558,7 +672,6 @@ const SuggestionsManager = {
                 if (query) SuggestionsManager.handleDesktopInput(query);
             });
 
-            // Tutup dropdown desktop jika klik di luar search box
             document.addEventListener("click", (e) => {
                 if (!e.target.closest(".search-box")) {
                     SuggestionsManager.closeDesktopDropdown();
@@ -567,20 +680,16 @@ const SuggestionsManager = {
         }
     },
 
-    // ---------------- MOBILE POPUP OVERLAY ----------------
     openMobileOverlay: (initialQuery) => {
         const mainInput = document.querySelector(".search-input");
-        
-        // 1. Kunci nilai asli input utama. Jika tombol X utama baru saja ditekan, ambil dari backup.
         let originalMainQuery = "";
         if (mainInput) {
             originalMainQuery = mainInput.hasAttribute('data-backup-value') 
                 ? mainInput.getAttribute('data-backup-value') 
                 : mainInput.value;
-            mainInput.removeAttribute('data-backup-value'); // Hapus backup setelah dibaca
+            mainInput.removeAttribute('data-backup-value');
         }
 
-        // Tentukan isi awal di dalam popup (kosong jika X ditekan, atau sesuai isi input)
         const activeQuery = mainInput && mainInput.value.trim() !== "" ? mainInput.value : (initialQuery || "");
 
         let overlay = document.querySelector(".sug-mobile-overlay");
@@ -607,17 +716,11 @@ const SuggestionsManager = {
             const clearBtn = overlay.querySelector("#sugClearBtn");
             const backBtn = overlay.querySelector("#sugBackBtn");
 
-            // 2. Tombol Back: Murni mengembalikan input utama ke nilai ASLI awal, 
-            // TIDAK PEDULI apa yang diketik atau dihapus di popup.
             backBtn.addEventListener("click", () => {
                 if (mainInput) {
                     mainInput.value = overlay.dataset.originalQuery || "";
-                    
-                    // TAMBAHAN: Munculkan kembali tombol X utama jika nilainya tidak kosong
                     const mainClearBtn = document.querySelector(".cleartext");
-                    if (mainClearBtn) {
-                        mainClearBtn.style.display = mainInput.value ? "block" : "none";
-                    }
+                    if (mainClearBtn) mainClearBtn.style.display = mainInput.value ? "block" : "none";
                 }
                 SuggestionsManager.closeMobileOverlay();
             });
@@ -632,22 +735,18 @@ const SuggestionsManager = {
             mobInput.addEventListener("input", (e) => {
                 const val = e.target.value;
                 clearBtn.style.display = val ? "block" : "none";
-                // CATATAN: mainInput Sengaja TIDAK DIUBAH DI SINI sama sekali!
                 SuggestionsManager.fetchAndRender(val.trim(), "#sugMobileList", true);
             });
 
             mobInput.addEventListener("keyup", (e) => {
                 if (e.key === "Enter" && mobInput.value.trim()) {
-                    // Konfirmasi enter: Sinkronkan mainInput sebelum pindah halaman
                     if (mainInput) mainInput.value = mobInput.value.trim();
                     window.location.href = `/search?q=${encodeURIComponent(mobInput.value.trim()).replace(/%20/g, '+')}${searchLangParam}${searchParam}`;
                 }
             });
         }
 
-        // Simpan nilai original terbaru ke dataset setiap kali overlay dipanggil
         overlay.dataset.originalQuery = originalMainQuery;
-
         overlay.classList.add("active");
         const mobInput = overlay.querySelector(".sug-mobile-input");
         const clearBtn = overlay.querySelector("#sugClearBtn");
@@ -656,10 +755,7 @@ const SuggestionsManager = {
         clearBtn.style.display = activeQuery ? "block" : "none";
         
         mobInput.focus();
-        
-        setTimeout(() => {
-            mobInput.setSelectionRange(mobInput.value.length, mobInput.value.length);
-        }, 10);
+        setTimeout(() => { mobInput.setSelectionRange(mobInput.value.length, mobInput.value.length); }, 10);
 
         if (activeQuery.trim()) {
             SuggestionsManager.fetchAndRender(activeQuery.trim(), "#sugMobileList", true);
@@ -671,7 +767,6 @@ const SuggestionsManager = {
         if (overlay) overlay.classList.remove("active");
     },
 
-    // ---------------- DESKTOP DROPDOWN ----------------
     handleDesktopInput: (query) => {
         if (!query) {
             SuggestionsManager.closeDesktopDropdown();
@@ -693,7 +788,6 @@ const SuggestionsManager = {
         if (dropdown) dropdown.remove();
     },
 
-    // ---------------- FETCH & RENDER LOGIC ----------------
     fetchAndRender: (query, targetSelector, isMobile) => {
         clearTimeout(SuggestionsManager.debounceTimer);
         if (!query) {
@@ -754,7 +848,6 @@ const SuggestionsManager = {
         }
     }
 };
-
 
 
 // ==========================================
@@ -824,10 +917,6 @@ function renderNews(res) {
     if (Config.startIndex === 1) UI.renderFooter();
 }
 
-// ==========================================
-// KODE YANG SUDAH DISESUAIKAN (BAGIAN RENDER WEB & WIDGET VIDEO)
-// ==========================================
-
 function renderWebResults(res) {
   const container = document.querySelector(".main-result .results-list");
   const isFirstPage = Config.startIndex === 1;
@@ -846,39 +935,34 @@ function renderWebResults(res) {
   }
 
   res.items.forEach((item, i) => {
-    const originUrl = new URL(item.link);
     const siteName = item.pagemap?.metatags?.[0]?.['og:site_name'] || item.displayLink;
     const snippet = item.pagemap?.question?.[0]?.text ? `${Utils.dateConversion(item.pagemap.question[0].datecreated, true)} - ${Utils.escapeHTML(item.pagemap.question[0].text)}` : Utils.escapeHTML(item.snippet);
-    
     const faviconHtml = isFaviconDisabled ? "" : `<div class="favicon"><img src="https://t0.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=${item.link}&size=64"></div>`;
 
-container.insertAdjacentHTML('beforeend', `
-  <div class="result-card result-card--flat">
-    <div class="tab-link">
-      <a href="${item.link}">
-        <div class="top">
-          ${faviconHtml}
-          <div class="link-rw"><div class="link">${siteName}</div><div class="link link--meta">${item.displayLink}</div></div>
+    container.insertAdjacentHTML('beforeend', `
+      <div class="result-card result-card--flat">
+        <div class="tab-link">
+          <a href="${item.link}">
+            <div class="top">
+              ${faviconHtml}
+              <div class="link-rw"><div class="link">${siteName}</div><div class="link link--meta">${item.displayLink}</div></div>
+            </div>
+            <div class="title">${Utils.escapeHTML(item.title)}</div>
+          </a>
         </div>
-        <div class="title">${Utils.escapeHTML(item.title)}</div>
-      </a>
-    </div>
-    <div class="btm-snpt"><div class="snippet"><span>${snippet || getText("noSiteInfo")}</span></div></div>
-  </div>
-`);
+        <div class="btm-snpt"><div class="snippet"><span>${snippet || getText("noSiteInfo")}</span></div></div>
+      </div>
+    `);
 
-    // 1. RESERVASI TEMPAT: Sisipkan slot kosong tepat setelah hasil web ke-2 (Indeks 1)
     if (i === 1 && isFirstPage) {
       container.insertAdjacentHTML('beforeend', `<div id="dynamic-video-widget-slot"></div>`);
     }
   });
 
-  // Jika hasil web kurang dari 2, taruh slot di bagian akhir
   if (res.items.length < 2 && isFirstPage) {
     container.insertAdjacentHTML('beforeend', `<div id="dynamic-video-widget-slot"></div>`);
   }
 
-  // 2. Jalankan pemuatan video secara asynchronous di background
   if (isFirstPage) {
     Widgets.checkVideoWidget();
   }
@@ -901,7 +985,6 @@ container.insertAdjacentHTML('beforeend', `
   if (settings.newtab) document.querySelectorAll(".main-result a").forEach(a => a.target = "_blank");
 }
 
-
 async function checkInstantAnswers() {
     const queryMap = { "yahoo": "yahoo!", "notch": "markus persson", "bing": "microsoft bing", "bard": "google bard", "apple": "apple inc", "ronaldo": "cristiano ronaldo", "messi": "lionel messi" };
     const exactQuery = queryMap[Config.q.toLowerCase()] || Config.q;
@@ -916,7 +999,6 @@ function handlePaginationUi(cmd, res) {
   const wrapper = document.querySelector(".show-wrapper"); 
   if (!wrapper) return; 
   if (cmd === "start") { 
-    // Memunculkan kembali animasi loading circle saat tombol dipencet
     wrapper.innerHTML = `<div class="loader"><svg class="circular" viewBox="25 25 50 50"><circle class="path" cx="50" cy="50" r="20" fill="none" stroke-width="4" stroke-miterlimit="10"/></svg></div>`; 
     Config.startIndex += 10; 
     setTimeout(performSearch, 500); 
@@ -926,7 +1008,6 @@ function handlePaginationUi(cmd, res) {
     wrapper.innerHTML = `<div class="pagination-divider"></div><button class="more">${getText("more")}</button>`; 
   } 
 }
-
 
 function handlePagination() { handlePaginationUi("start"); }
 
@@ -948,7 +1029,6 @@ function initApp() {
     }
 }
 
-// Jalankan saat dokumen siap
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initApp);
 } else {

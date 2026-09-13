@@ -356,6 +356,101 @@ body.dark .instant-answer .logo {
 }
 
 /* --------------------------------------------------------------------
+   AI Overview (Widget)
+   -------------------------------------------------------------------- */
+
+.ai-overview-card {
+  padding: 16px;
+}
+
+.ai-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-title, #1a73e8);
+  margin-bottom: 12px;
+}
+.ai-header svg {
+  width: 18px;
+  height: 18px;
+  fill: currentColor;
+}
+
+.ai-overview-card .section-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 16px 0 8px;
+}
+
+.ai-overview-card ul.dynamic-list {
+  list-style-type: disc;
+  padding-left: 20px;
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--color-text);
+}
+.ai-overview-card ul.dynamic-list li {
+  margin-bottom: 8px;
+}
+.ai-overview-card ul.dynamic-list li.hidden-item {
+  display: none;
+}
+.ai-overview-card ul.dynamic-list li strong {
+  color: var(--color-text-dark, #202124);
+}
+body.dark .ai-overview-card ul.dynamic-list li strong {
+  color: #E9EAEE;
+}
+
+.btn-show-more {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  margin-top: 14px;
+  padding: 8px 0;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text-dark, #202124);
+  background-color: var(--color-bg-alt, #f1f3f4);
+  border: 1px solid var(--color-border, #d2d2d7);
+  border-radius: 20px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+body.dark .btn-show-more {
+  color: #E9EAEE;
+  background-color: #303135;
+  border-color: #3c4043;
+}
+.btn-show-more svg {
+  width: 12px;
+  height: 12px;
+  transition: transform 0.3s ease;
+}
+.btn-show-more.expanded svg {
+  transform: rotate(180deg);
+}
+
+/* Skeleton Loading Shimmer */
+.bone-container { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
+.bone-line {
+  height: 14px;
+  border-radius: 4px;
+  background: linear-gradient(90deg, var(--color-bg-alt, #f0f0f0) 25%, var(--color-border, #e0e0e0) 50%, var(--color-bg-alt, #f0f0f0) 75%);
+  background-size: 400px 100%;
+  animation: shimmer 1.4s infinite linear;
+}
+.bone-line.short { width: 50%; }
+.bone-line.medium { width: 80%; }
+@keyframes shimmer { 0% { background-position: -200px 0; } 100% { background-position: 200px 0; } }
+
+
+/* --------------------------------------------------------------------
    Berita (dulu .nwst / .snwt)
    -------------------------------------------------------------------- */
 

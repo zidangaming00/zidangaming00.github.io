@@ -321,8 +321,13 @@ const Widgets = {
 
         mainResult.insertAdjacentElement('afterbegin', card);
 
+        const contextSnippets = res?.items 
+            ? res.items.slice(0, 4).map(item => `- ${item.title}: ${item.snippet}`).join("\n")
+            : "";
+
         try {
-            const rawText = await API.fetchAI(query);
+            // 2. Kirim query DAN contextSnippets ke API.fetchAI
+            const rawText = await API.fetchAI(query, contextSnippets);
 
             // Validasi Pesan: Jika AI menolak atau tidak menyertakan delimiter '---', hapus card
             const isRefusal = /i('m| am) sorry|can'?t provide|cannot provide|maaf,?\s*(saya|kami)?|tidak dapat|tidak bisa/i.test(rawText);

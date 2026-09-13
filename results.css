@@ -394,33 +394,45 @@ body.dark .ai-sub-title {
   color: #e8eaed;
 }
 
-/* Memperbaiki Bullet List & Mencegah Flexbox Rusak */
+/* Memperbaiki Bullet List & Sistem Toggle Show More/Less */
 .ai-overview-card ul.dynamic-list {
   list-style-type: disc !important;
   padding-left: 20px !important;
   margin: 0;
 }
 
+/* Hapus !important pada display agar item bisa disembunyikan oleh JS/class */
 .ai-overview-card ul.dynamic-list li {
-  display: list-item !important; /* Wajib list-item agar bullet muncul & tidak terbagi jadi kolom flex */
+  display: list-item; 
   margin-bottom: 8px;
   color: var(--color-text, #4d5156);
   font-size: 14px;
   line-height: 1.5;
 }
 
+/* Berikan !important pada hidden-item agar pasti tersembunyi */
 .ai-overview-card ul.dynamic-list li.hidden-item {
-  display: none;
+  display: none !important;
+}
+
+/* Style khusus teks AI agar tidak dibatasi 3 baris */
+.ai-overview-card .ai-summary-text {
+  font-size: 14px;
+  color: var(--color-text, #4d5156);
+  line-height: 1.5;
+  display: block;
+  word-break: break-word;
 }
 
 .ai-overview-card ul.dynamic-list li strong {
-  display: inline !important; /* Memastikan kata kunci menyatu dengan teks penjelasan */
+  display: inline !important;
   color: var(--color-text-dark, #202124);
   font-weight: 600;
 }
 body.dark .ai-overview-card ul.dynamic-list li strong {
   color: #e8eaed;
 }
+
 
 .btn-show-more {
   display: flex;

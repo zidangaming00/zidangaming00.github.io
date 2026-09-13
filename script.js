@@ -50,7 +50,8 @@ const LANG_DICT = {
         noSiteInfo: "There is no information on this page.", suggtext: "Search suggestion:", adlabel: "Ad",
         noresultsug: ["Try different keywords.", "Try more general keywords.", "Try fewer keywords."],
         tab: ["All", "Images", "Videos", "News", "Maps"],
-        aiHeader: "AI Overview (Beta)", aiMore: "Show more", aiLess: "Show less"
+        aiHeader: "AI Overview (Beta)", aiMore: "Show more", aiLess: "Show less",
+        aiThinking: "Thinking"
     },
     id: {
         news: "Hasil berita <pre>Beta</pre>", more: "Hasil penelusuran lainnya", vidTitle: "Video",
@@ -59,7 +60,8 @@ const LANG_DICT = {
         noSiteInfo: "Tidak ada informasi mengenai halaman ini.", suggtext: "Saran pencarian:", adlabel: "Iklan",
         noresultsug: ["Coba kata kunci yang berbeda.", "Coba kata kunci yang lebih umum.", "Coba lebih sedikit kata kunci."],
         tab: ["Semua", "Gambar", "Video", "Berita", "Peta"],
-        aiHeader: "Ringkasan AI (Beta)", aiMore: "Tampilkan lainnya", aiLess: "Tampilkan lebih sedikit"
+        aiHeader: "Ringkasan AI (Beta)", aiMore: "Tampilkan lainnya", aiLess: "Tampilkan lebih sedikit",
+        aiThinking: "Berpikir"
     }
 };
 
@@ -301,13 +303,14 @@ const Widgets = {
         const card = document.createElement("div");
         card.className = "result-card result-card--flat ai-overview-card";
         
+        const thinkingTitle = getText("aiThinking");
         const headerTitle = getText("aiHeader");
 
         // Skeleton loading
         card.innerHTML = `
             <div class="ai-header">
                 <svg viewBox="0 0 24 24"><path d="M19 9l1.25-2.75L23 5l-2.75-1.25L19 1l-1.25 2.75L15 5l2.75 1.25L19 9zm-7.5.5L9 4 6.5 9.5 1 12l5.5 2.5L9 20l2.5-5.5L17 12l-5.5-2.5zM19 15l-1.25 2.75L15 19l2.75 1.25L19 23l1.25-2.75L23 19l-2.75-1.25L19 15z"/></svg>
-                <span>${headerTitle}</span>
+                <span>${thinkingTitle}</span>
             </div>
             <div class="bone-container">
                 <div class="bone-line"></div>

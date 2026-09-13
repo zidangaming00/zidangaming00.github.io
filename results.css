@@ -384,25 +384,42 @@ body.dark .instant-answer .logo {
   margin: 16px 0 8px;
 }
 
-.ai-overview-card ul.dynamic-list {
-  list-style-type: disc;
-  padding-left: 20px;
-  margin: 0;
-  font-size: 14px;
-  line-height: 1.6;
-  color: var(--color-text);
-}
-.ai-overview-card ul.dynamic-list li {
-  margin-bottom: 8px;
-}
-.ai-overview-card ul.dynamic-list li.hidden-item {
-  display: none;
-}
-.ai-overview-card ul.dynamic-list li strong {
+.ai-sub-title {
+  font-size: 15px;
+  font-weight: 600;
   color: var(--color-text-dark, #202124);
+  margin: 14px 0 8px 0;
+}
+body.dark .ai-sub-title {
+  color: #e8eaed;
+}
+
+/* Memperbaiki Bullet List & Mencegah Flexbox Rusak */
+.ai-overview-card ul.dynamic-list {
+  list-style-type: disc !important;
+  padding-left: 20px !important;
+  margin: 0;
+}
+
+.ai-overview-card ul.dynamic-list li {
+  display: list-item !important; /* Wajib list-item agar bullet muncul & tidak terbagi jadi kolom flex */
+  margin-bottom: 8px;
+  color: var(--color-text, #4d5156);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.ai-overview-card ul.dynamic-list li.hidden-item {
+  display: none !important;
+}
+
+.ai-overview-card ul.dynamic-list li strong {
+  display: inline !important; /* Memastikan kata kunci menyatu dengan teks penjelasan */
+  color: var(--color-text-dark, #202124);
+  font-weight: 600;
 }
 body.dark .ai-overview-card ul.dynamic-list li strong {
-  color: #E9EAEE;
+  color: #e8eaed;
 }
 
 .btn-show-more {

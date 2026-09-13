@@ -346,7 +346,9 @@ const Widgets = {
         `;
 
         if (listItems.length > 0) {
-            if (subTitle) html += `<div class="title section-title">${subTitle}</div>`;
+            // Menggunakan .ai-sub-title agar tidak berwarna biru seperti link pencarian
+            if (subTitle) html += `<div class="ai-sub-title">${subTitle}</div>`;
+            
             html += `<ul class="dynamic-list">`;
             listItems.forEach((item, index) => {
                 let hiddenClass = index > 0 ? "hidden-item" : "";

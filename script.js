@@ -372,7 +372,7 @@ const Widgets = {
         }
 
         return html;
-    }
+    },
 
 
     toggleAIList: (btn) => {

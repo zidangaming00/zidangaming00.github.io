@@ -100,7 +100,7 @@ input[type="search"]::-webkit-search-results-decoration {
   justify-content: center;
   align-items: center;
   background: var(--color-white);
-  padding: 8px 12px;
+  padding: 8px 12px 0px 12px;
   width: 100%;
 }
 
